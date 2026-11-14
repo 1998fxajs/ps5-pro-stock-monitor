@@ -1,8 +1,8 @@
 {
   "ssg_emart": {
-    "status": "access_denied",
-    "reason": "All SSG public page variants lacked verified stock signal: expected product title absent; m.ssg.com HTTP 403; shinsegaemall.ssg.com HTTP 403; www.ssg.com HTTP 403",
-    "checked_at": "2026-11-14T19:17:55.434657+00:00"
+    "status": "out_of_stock",
+    "reason": "SSG sellStatCd=80",
+    "checked_at": "2026-11-14T21:37:43.569825+00:00"
   },
   "gamewoori": {
     "status": "out_of_stock",
