@@ -1,0 +1,17 @@
+{
+  "ssg_emart": {
+    "status": "unknown",
+    "reason": "expected product title absent",
+    "checked_at": "2026-11-14T18:17:03.711183+00:00"
+  },
+  "gamewoori": {
+    "status": "out_of_stock",
+    "reason": "product-heading sold out badge",
+    "checked_at": "2026-11-14T18:17:03.711224+00:00"
+  },
+  "compuzone": {
+    "status": "unknown",
+    "reason": "no validated explicit product-level in-stock signal",
+    "checked_at": "2026-11-14T18:17:03.711236+00:00"
+  }
+}
