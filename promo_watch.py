@@ -5,6 +5,7 @@ Lead alerts are NOT confirmed inventory. Google News RSS is a best-effort
 public discovery source and can be delayed, incomplete, or rate limited.
 """
 import base64
+import monitor_window
 import email.utils
 import hashlib
 import json
@@ -146,6 +147,9 @@ def read_community_rss(label, url):
 
 
 def main():
+    if not monitor_window.is_active_at():
+        print("Watch ended at 2026-11-19 23:59 KST; no feeds or Telegram alerts")
+        return
     state, sha = load_state()
     seen = set(state.get("seen", []))
     first_run = sha is None
