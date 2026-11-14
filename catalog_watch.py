@@ -100,7 +100,7 @@ def acceptable_title(name):
 def allow_url(url, source):
     parsed = urllib.parse.urlparse(url)
     host = (parsed.hostname or "").lower()
-    if not host.endswith(source["domain"]):
+    if host != source["domain"] and not host.endswith("." + source["domain"]):
         return False
     path = parsed.path.lower()
     if source["type"] == "cafe24":
