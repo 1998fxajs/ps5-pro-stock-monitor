@@ -28,6 +28,8 @@ FEEDS = [
     ("국내 판매처", '"PS5 프로" (겟디즈 OR 겜우리 OR 플레이샵 OR 이마트 OR SSG OR 지마켓 OR 네이버 OR 디지털그랩 OR 래플즈 OR 오진상사)'),
     ("특가", '"PS5 Pro" (핫딜 OR 특가 OR 프로모션 OR 할인 OR 판매)'),
     ("커뮤니티 특가", '"PS5 Pro" (site:ppomppu.co.kr OR site:quasarzone.com OR site:ruliweb.com OR site:fmkorea.com)'),
+    ("마켓 프로모션", '("PS5 Pro" OR "플스5 프로") (G마켓 OR 지마켓 OR SSG OR 쓱 OR 네이버 OR 이마트 OR 디지털그랩 OR CJ온스타일 OR 쿠팡 OR 11번가) (판매 OR 재입고 OR 픽업 OR 특가 OR 추첨)'),
+    ("유통사/응모", '("PS5 Pro" OR "PS5 프로") (오진상사 OR 플레이샵 OR 컴퓨존 OR 겜우리 OR 겟디즈 OR THESE OR 래플 OR 톡딜) (판매 OR 응모 OR 재입고 OR 오픈)'),
 ]
 INCLUDE = re.compile(r"(?:\bps\s*5\s*pro\b|\bps5\s*프로\b|플레이스테이션\s*5?\s*프로|플스\s*5?\s*프로)", re.I)
 EXCLUDE = re.compile(
