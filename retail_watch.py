@@ -238,10 +238,24 @@ def main():
             site = futures[future]
             try:
                 results[site["id"]] = (site, future.result())
+            except HTTPError as exc:
+                # A direct 403 can indicate automated-access restrictions, but
+                # it may also be a network policy or temporary response.
+                # Do not try to defeat login, CAPTCHA or bot protections.
+                status = "access_denied" if exc.code in (401, 403, 429) else "unavailable"
+                results[site["id"]] = (site, {
+                    "status": status,
+                    "reason": f"public HTTP request returned {exc.code}; direct stock check unavailable"
+                })
+                print(f"{site['name']}: HTTP {exc.code} ({status})", file=sys.stderr)
             except Exception as exc:
+                results[site["id"]] = (site, {
+                    "status": "unavailable",
+                    "reason": f"{type(exc).__name__}: {str(exc)[:120]}"
+                })
                 print(f"{site['name']}: check failed ({type(exc).__name__}: {exc})", file=sys.stderr)
     if not results:
-        raise RuntimeError("Every retailer check failed")
+        raise RuntimeError("No retailer check produced a state")
     changed = False
     for key, (site, result) in results.items():
         previous = state.get(key, {}).get("status")
@@ -253,6 +267,14 @@ def main():
                 f"{site['name']} | {result['price']:,}원\n"
                 f"{site['url']}\n"
                 "결제 가능 여부와 단품 구성은 최종 확인하세요."
+            )
+        elif current == "access_denied" and previous != "access_denied":
+            telegram(
+                "[PS5 Pro 감시 장애 - 접근 제한 가능성]\\n"
+                f"{site['name']}\\n{site['url']}\\n"
+                "GitHub 실행 환경에서 사이트가 401/403/429를 반환했습니다. "
+                "재고 없음이 아니라 직접 확인 불가입니다. "
+                "공개 판매글 탐색은 별도 실행됩니다."
             )
         elif previous == "out_of_stock" and current == "unknown" and site["type"] in ("cafe24", "gmarket"):
             # Potentially relevant *change* only; intentionally not called stock.
