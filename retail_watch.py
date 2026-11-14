@@ -128,19 +128,19 @@ def structured_status(html, store):
                 return {"status": "over_budget", "reason": "explicit offer above standalone ceiling", "price": price}
     return None
 
-def check(store):
-    html = fetch(store["url"])
+def parse_product(store, html):
     text = clean_text(html)
     if not re.search(store["title"], text, re.I):
         return {"status": "unknown", "reason": "expected product title absent"}
 
-    # Cafe24 platforms: the product's title can be followed by an image whose
-    # alt text is '품절'. Unlike page-wide text this is an item-level marker.
+    # Require sold-out marker in the product heading, not arbitrary page text
+    # or a carousel of unrelated goods. Cafe24 typically embeds this in h1/h2.
     if store["type"] == "cafe24":
-        match = re.search(store["title"], html, re.I)
-        context = html[max(0, match.start() - 300):match.end() + 420] if match else ""
-        if re.search(r"<img\b[^>]*alt\s*=\s*['\"]?품절", context, re.I):
-            return {"status": "out_of_stock", "reason": "product-level sold out image"}
+        headings = re.findall(r"<h[1-3]\b[^>]*>.*?</h[1-3]>", html, re.I | re.S)
+        for heading in headings:
+            if (re.search(store["title"], clean_text(heading), re.I)
+                    and re.search(r"<img\b[^>]*\balt\s*=\s*['\"]품절['\"]", heading, re.I)):
+                return {"status": "out_of_stock", "reason": "product-heading sold out badge"}
         # Some Cafe24 themes place a SOLD OUT button inside the purchase UI,
         # but pages can contain 'SOLD OUT' in unrelated recommendations, so
         # this is not used as a positive signal.
@@ -157,6 +157,9 @@ def check(store):
     if positive is not None:
         return positive
     return {"status": "unknown", "reason": "no validated explicit product-level in-stock signal"}
+
+def check(store):
+    return parse_product(store, fetch(store["url"]))
 
 def gh(path, payload=None):
     repo = os.environ["GITHUB_REPOSITORY"]
