@@ -32,6 +32,7 @@ FEEDS = [
     ("플스5 프로", '("플스5 프로" OR "플스 5 프로" OR "플스5프로" OR "플스 프로") (재고 OR 판매 OR 핫딜 OR 특가 OR 추첨)'),
     ("모델번호 CFI-7122B", '("CFI-7122B" OR "CFI 7122B") (판매 OR 입고 OR 특가 OR 예약 OR 프로모션)'),
     ("국내 마켓", '("PS5 Pro" OR "PS5 프로") (지마켓 OR G마켓 OR SSG OR 쓱 OR 이마트 OR 디지털그랩 OR 네이버 OR 네이버플러스스토어 OR 쿠팡 OR 11번가 OR 롯데온 OR 롯데하이마트)'),
+    ("G마켓 공개 판매글", '("PS5 Pro" OR "PS5프로" OR "플스5 프로" OR "플레이스테이션 5 프로") (G마켓 OR 지마켓 OR Gmarket OR "G마켓 슈퍼딜") (판매 OR 재고 OR 재입고 OR 할인 OR 특가 OR 선착순 OR 추첨)'),
     ("공식·게임 전문점", '("PS5 Pro" OR "플스5 프로") (오진상사 OR 플레이샵 OR 컴퓨존 OR 겜우리 OR 겟디즈 OR 겟디스 OR get-these OR THESE OR 전자랜드)'),
     ("뜻밖의 특가 판매처", '("PS5 Pro" OR "플레이스테이션5 프로") (4910 OR 무신사 OR 29CM OR 오늘의집 OR 카카오톡딜 OR 톡딜 OR 트레이더스 OR 당근 OR 크림 OR KREAM OR 래플 OR 래플즈)'),
     ("국내 특가 커뮤니티", '("PS5 Pro" OR "PS5프로") (site:ppomppu.co.kr OR site:quasarzone.com OR site:ruliweb.com OR site:fmkorea.com OR site:hotdeal.zip)'),
