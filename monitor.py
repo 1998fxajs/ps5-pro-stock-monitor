@@ -21,10 +21,10 @@ PRICE_LIMIT = 1_298_000
 STATE_FILE = "monitor_state.json"
 USER_AGENT = "Mozilla/5.0 (compatible; PS5ProMonitor/1.0; public stock check)"
 
-def http(url, data=None, headers=None):
+def http(url, data=None, headers=None, method=None):
     h = {"User-Agent": USER_AGENT, "Accept": "text/html,application/json"}
     h.update(headers or {})
-    req = Request(url, data=data, headers=h)
+    req = Request(url, data=data, headers=h, method=method)
     with urlopen(req, timeout=20) as response:
         return response.read().decode("utf-8", errors="replace")
 
@@ -100,7 +100,8 @@ def gh(path, data=None):
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json",
                "Content-Type": "application/json", "X-GitHub-Api-Version": "2022-11-28"}
     payload = json.dumps(data).encode() if data is not None else None
-    return json.loads(http(f"https://api.github.com/repos/{repo}/{path}", payload, headers))
+    return json.loads(http(f"https://api.github.com/repos/{repo}/{path}", payload, headers,
+                           method="PUT" if data is not None else "GET"))
 
 def load_state():
     import base64
