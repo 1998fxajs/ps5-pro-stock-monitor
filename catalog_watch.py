@@ -33,6 +33,7 @@ STORE_LISTS = [
         "id": "getthese",
         "name": "겟디즈 상품 카테고리",
         "url": "https://get-these.com/category/product/23/",
+        "alternate_urls": ["https://get-these.com/"],
         "domain": "get-these.com",
         "path_key": "product",
         "type": "cafe24",
@@ -41,6 +42,7 @@ STORE_LISTS = [
         "id": "ssg",
         "name": "SSG / 이마트 새 판매 페이지",
         "url": "https://www.ssg.com/search.ssg?query=%ED%94%8C%EC%8A%A45%ED%94%84%EB%A1%9C",
+        "alternate_urls": ["https://emart.ssg.com/search.ssg?query=%ED%94%8C%EC%8A%A45%ED%94%84%EB%A1%9C"],
         "domain": "ssg.com",
         "path_key": "item",
         "type": "ssg",
@@ -48,7 +50,8 @@ STORE_LISTS = [
     {
         "id": "compuzone",
         "name": "컴퓨존 상품 검색",
-        "url": "https://www.compuzone.co.kr/search/search.htm?SearchProductKey=PS5%20Pro",
+        "url": "https://www.compuzone.co.kr/product/product_list.htm?BigDivNo=103&DivNo=4044&MediumDivNo=1381",
+        "alternate_urls": ["https://www.compuzone.co.kr/search/search.htm?Seargbl=1&SearchType=0&SearchProductKey=PS5%20Pro"],
         "domain": "compuzone.co.kr",
         "path_key": "product",
         "type": "compuzone",
@@ -187,8 +190,22 @@ def main():
         for future in concurrent.futures.as_completed(tasks):
             src = tasks[future]
             try:
-                html = future.result()
-                matches = discover(src, html)
+                pages = []
+                try:
+                    pages.append((src["url"], future.result()))
+                except Exception as exc:
+                    print(f"CATALOG PRIMARY UNAVAILABLE {src['name']}: {type(exc).__name__}: {exc}")
+                for fallback in src.get("alternate_urls", []):
+                    try:
+                        pages.append((fallback, request(fallback)))
+                    except Exception as exc:
+                        print(f"CATALOG PUBLIC ALTERNATIVE UNAVAILABLE {src['name']}: {type(exc).__name__}: {exc}")
+                if not pages:
+                    raise RuntimeError("all public catalog and search pages unavailable")
+                matches = {}
+                for page_url, page in pages:
+                    matches.update(discover(src, page))
+                html = pages[0][1]
                 if src["id"] == "getthese":
                     # The store may place newly published consoles in a
                     # separate PlayStation subcategory rather than the main
