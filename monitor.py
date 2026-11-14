@@ -145,9 +145,10 @@ def main():
                 raise
             failed_urls.append(f"{url}: HTTP {exc.code}")
     if html is None:
-        raise RuntimeError("All public PlayShop product URLs returned 404/410: " +
-                           "; ".join(failed_urls))
-    result = check_playshop(html)
+        result = {"status": "unavailable", "reason": "GitHub runner received 404/410 for every public PlayShop product URL"}
+        print("PlayShop check inaccessible from GitHub runner; not treating as sold out")
+    else:
+        result = check_playshop(html)
     status = result["status"]
     previous, sha = load_state()
     before = previous.get("playshop", {}).get("status")
@@ -157,6 +158,9 @@ def main():
     if status == "in_stock" and before != "in_stock":
         alert(f"PS5 Pro 2TB 단품 정가 재고 감지\n{result['price']:,}원\n{PRODUCT_URL}\n"
               "결제 가능 여부는 판매처에서 직접 확인하세요.")
+    elif status == "unavailable" and before != "unavailable":
+        alert("[감시 장애] PlayShop 상품 페이지가 GitHub 클라우드에서 404를 반환하여 "
+              "직접 재고 확인이 불가능합니다. 다른 판매처 감시는 별도로 유지됩니다.\n" + PRODUCT_URL)
     if status != before:
         previous["playshop"] = {
             "status": status, "reason": result["reason"],
