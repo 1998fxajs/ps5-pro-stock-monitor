@@ -1,34 +1,43 @@
-# PS5 Pro Stock Monitor
+# PS5 Pro Stock & Deal Monitor
 
-무료 GitHub Actions 기반 PS5 Pro 2TB 국내 정식 신품 단품 감시 프로젝트입니다. 게임 개발 프로젝트와 분리합니다.
+국내 PS5 Pro 2TB **신품 본체 단품** 판매·입고·프로모션을 찾아 텔레그램으로 알리는 무료 GitHub Actions 프로젝트입니다. 게임 개발 저장소와 독립적으로 운영합니다.
 
-## 현재 구현 상태
+## 가격 및 구매 정책
 
-- GitHub Actions: 약 5분 간격 예약 (실행 지연/누락 가능).
-- PlayShop 상품 페이지 조회 및 품절/불명 상태 구분.
-- **구매 가능 상태를 입증할 사이트별 신호는 아직 검증되지 않았습니다.** 불명 상태에서는 알림을 보내지 않습니다.
-- **텔레그램 Secrets 미설정**: 메시지 전송 테스트 전.
-- 실제 구매/결제 매크로는 미통합 및 비활성화. 이전 매크로 원본을 확보하지 못했습니다.
+- 단품 정가 우선: **1,298,000원 이하**에서 재고 확인 알림.
+- 최대 1,380,000원 상품 및 추첨·프로모션은 **정보 확인용 알림**으로만 취급.
+- 추가 컨트롤러·디스크 드라이브 번들, 중고, 리퍼, 해외직구, 울버린 세트는 자동 구매 대상에서 제외.
+- **구매·로그인·결제 자동화 없음.** 기존 매크로의 실제 소스는 확보하지 못했습니다. 자동 구매 1대 제한은 도입 시 별도 검증 필요.
+- 가격이나 재고가 불확실한 사이트를 구매 가능하다고 확정하지 않습니다.
 
-목표: PS5 Pro 2TB 단품 1,298,000원 이하만 자동구매 후보, 1,380,000원 이하 상품은 알림만. 현재 자동 구매 기능은 없습니다. 단품 외 번들, 중고, 해외직구, 리셀은 제외합니다.
+## 작동하는 워크플로
 
-## 텔레그램 설정
+1. **[판매처 감시](https://github.com/1998fxajs/ps5-pro-stock-monitor/actions/workflows/retail-watch.yml)**: 겜우리, 이마트몰/SSG, 컴퓨존, G마켓, 겟디즈의 공개 단품 상품 페이지를 약 5분 주기로 조회. GitHub Actions 실행시각은 지연되거나 누락될 수 있습니다.
+2. **[판매글·특가·추첨 발견](https://github.com/1998fxajs/ps5-pro-stock-monitor/actions/workflows/promo-watch.yml)**: Google 뉴스 RSS에서 PS5 Pro, PS5프로, 플레이스테이션5 프로, 플스5프로, CFI-7122B 등 10종류의 검색 그룹을 확인. 뽐뿌 공개 RSS 두 곳도 별도로 시도합니다.
+3. **[텔레그램 메시지 테스트](https://github.com/1998fxajs/ps5-pro-stock-monitor/actions/workflows/test-telegram.yml)**: 수동 테스트. 사용자 휴대폰 수신 확인 완료.
 
-1. Telegram에서 @BotFather를 통해 봇을 만들고 발급받은 토큰을 안전하게 보관합니다.
-2. 해당 봇과 1:1 대화를 시작한 후 메시지 하나를 보냅니다.
-3. 봇 API의 `getUpdates`로 개인 대화의 `chat.id`를 확인합니다.
-4. 저장소 **Settings → Secrets and variables → Actions → New repository secret** 에 아래 이름으로 등록합니다.
-   - `TELEGRAM_BOT_TOKEN`
-   - `TELEGRAM_CHAT_ID`
-5. **Actions → PS5 Pro availability monitor → Run workflow**에서 오류 여부를 확인합니다.
+모든 알림은 `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` GitHub Actions Secrets를 통해 전송합니다. 자격정보를 코드에 업로드하지 마세요.
 
-봇 토큰, 채팅 ID, 전화번호, 결제 정보는 공개 저장소나 README에 올리지 마세요.
+## 직접 상품 링크
 
-## 감시 대상
+| 판매처 | URL | 마지막 검증 결과 |
+|---|---|---|
+| 겜우리 | https://www.gamewoori.com/product/detail.html?product_no=16602 | 상품 페이지 조회, 품절 표시 감지 |
+| 이마트몰/SSG | https://emart.ssg.com/item/itemDtl.ssg?itemId=1000619325394 | 페이지 조회, 상품명 자동 확인 실패 -> 불명 |
+| 컴퓨존 | https://www.compuzone.co.kr/product/product_detail.htm?ProductNo=1315525 | 페이지 조회, 재고 확정 불가 -> 불명 |
+| G마켓 | https://item.gmarket.co.kr/Item?goodscode=4146068876 | GitHub 서버에서 HTTP 403 -> 직접 재고 감시 불가 |
+| 겟디즈 | https://get-these.com/product/ps5-pro-%EC%BD%98%EC%86%94-2tb-%EC%88%9C%EC%B0%A8%EC%B6%9C%EA%B3%A0/426/category/23/display/1/ | 공개 정형 데이터로 품절 확인 |
 
-- [PlayShop PS5 Pro](https://playshop.co.kr/product/ps5-pro-%EC%BD%98%EC%86%94/334): 공개 페이지 조회, 품절 추정만 구현. 재고 확인 신호 검증 필요.
-- 타 판매점: 현재 미구현. 정확한 단품 상품 URL과 신뢰 가능한 구매 가능 신호 검증 후 추가.
+플레이샵 직접 상품 감시 워크플로는 요청에 따라 삭제했습니다. G마켓 403은 봇 차단일 수 있지만 **원인을 확정하지는 못했습니다**. 우회·접근 제한 회피를 구현하지 않고, 별도의 공개 판매글 검색으로 보완합니다.
 
-## 제한
+## 알림 정확도
 
-스크립트는 재고가 확실하지 않으면 절대로 구매 가능하다고 판단하지 않습니다. 이 상태에서는 **재고가 실제로 생겨도 알림이 발송되지 않을 수 있습니다**. 5분 정각 실행이나 품절 감지의 정확성을 보장할 수 없습니다. 접근 제한, 캡차, 로그인 우회 등은 하지 않습니다.
+- 정형 상품 데이터에서 명확히 `InStock`이 확인되고 품명·정가·통화가 조건에 맞으면 **재고 감지** 알림.
+- 기존 품절 표시가 사라졌다면 **확인 필요** 알림. 이것은 실제 재고 보장이 아닙니다.
+- G마켓 등 접근 오류는 **감시 장애**로 구분해 최초 변경 시만 알림.
+- RSS에 새 상품 판매 공지가 나오면 **판매 정보 확인 필요** 알림. 제목에 PS5 Pro가 있어도 실제 판매 여부를 보장하지 않습니다.
+- 검색 색인 지연, 실행 대기, 판매처 제한, 페이지 구조 변경이 존재하므로 **실시간·30초 이내 도착·전체 매물 감지를 보장하지 않습니다.**
+
+테스트: `python3 -m unittest test_retail_watch.py test_promo_watch.py -v`.
+
+GitHub 상태 기록: `retail_state.json` / `promo_seen.json`. 불명 상태의 판매처는 계속 검증이 필요합니다.
