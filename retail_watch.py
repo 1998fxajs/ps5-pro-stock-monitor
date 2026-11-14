@@ -42,6 +42,20 @@ STORES = [
         "type": "compuzone",
         "title": r"PlayStation\s*5\s*Pro\s*콘솔",
     },
+    {
+        "id": "gmarket_playshop",
+        "name": "G마켓 (PlayShop 공식판매처)",
+        "url": "https://item.gmarket.co.kr/Item?goodscode=4146068876",
+        "type": "gmarket",
+        "title": r"PS5\s*Pro\s*콘솔\s*2TB",
+    },
+    {
+        "id": "getthese",
+        "name": "겟디즈 / THESE",
+        "url": "https://get-these.com/product/ps5-pro-%EC%BD%98%EC%86%94-2tb-%EC%88%9C%EC%B0%A8%EC%B6%9C%EA%B3%A0/426/category/23/display/1/",
+        "type": "cafe24",
+        "title": r"PS5\s*Pro\s*콘솔\s*[-–]?\s*2TB(?:\s*순차출고)?",
+    },
 ]
 
 def fetch(url, data=None, headers=None, method=None):
@@ -152,6 +166,19 @@ def parse_product(store, html):
         # Its presence alone is NOT an in-stock signal.
         if re.search(r"입고예정\s*</?[^>]*>?\s*미정", html):
             return {"status": "out_of_stock", "reason": "replenishment ETA unknown"}
+    elif store["type"] == "gmarket":
+        # Target is a single, explicitly identified official listing 4146068876.
+        # Gmarket page-wide SOLD OUT can appear for recommended products;
+        # restrict the signal to the heading and immediate purchase section.
+        heading = re.search(
+            r"<h1\b[^>]*>\s*PS5\s*Pro\s*콘솔\s*2TB\s*</h1>",
+            html, re.I | re.S,
+        )
+        if heading:
+            purchase = clean_text(html[heading.end():heading.end() + 9000])
+            if re.search(r"\bSOLD\s*OUT\b", purchase, re.I):
+                return {"status": "out_of_stock", "reason": "sold-out label in primary Gmarket product panel"}
+        # If HTML differs from the documented page, retain unknown.
 
     positive = structured_status(html, store)
     if positive is not None:
@@ -205,7 +232,7 @@ def telegram(message):
 def main():
     state, sha = load_state()
     results = {}
-    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
         futures = {pool.submit(check, site): site for site in STORES}
         for future in concurrent.futures.as_completed(futures):
             site = futures[future]
@@ -227,7 +254,7 @@ def main():
                 f"{site['url']}\n"
                 "결제 가능 여부와 단품 구성은 최종 확인하세요."
             )
-        elif previous == "out_of_stock" and current == "unknown" and site["type"] == "cafe24":
+        elif previous == "out_of_stock" and current == "unknown" and site["type"] in ("cafe24", "gmarket"):
             # Potentially relevant *change* only; intentionally not called stock.
             telegram(
                 f"[PS5 Pro 품절 표시 변경 — 확인 필요]\n"
