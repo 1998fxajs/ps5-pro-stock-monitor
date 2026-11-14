@@ -45,7 +45,6 @@ STORE_LISTS = [
         "alternate_urls": [
             "https://emart.ssg.com/search.ssg?query=%ED%94%8C%EC%8A%A45%ED%94%84%EB%A1%9C",
             "https://emart.ssg.com/disp/category.ssg?dispCtgId=6000214771",
-            "https://m.department.ssg.com/disp/category.ssg?ctgId=6000209317",
         ],
         "domain": "ssg.com",
         "path_key": "item",
