@@ -6,6 +6,7 @@ A 'candidate' alert is only an indication that a product-specific sold-out
 marker disappeared; it is NOT confirmed available stock.
 """
 import base64
+import monitor_window
 import concurrent.futures
 import json
 import os
@@ -210,6 +211,9 @@ def telegram(message):
         raise RuntimeError("Telegram did not confirm delivery")
 
 def main():
+    if not monitor_window.is_active_at():
+        print("Watch ended at 2026-11-19 23:59 KST; no retailer checks or Telegram alerts")
+        return
     state, sha = load_state()
     results = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
