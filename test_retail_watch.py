@@ -5,8 +5,7 @@ import retail_watch as m
 GAME = m.STORES[0]
 SSG = m.STORES[1]
 COMPUZONE = m.STORES[2]
-GMARKET = m.STORES[3]
-GETTHESE = m.STORES[4]
+GETTHESE = m.STORES[3]
 
 def page(title, mark="", offers=""):
     return f"<html><head><title>{title}</title>{offers}</head><body><h1>{title} {mark}</h1></body></html>"
@@ -51,13 +50,6 @@ class RetailParsers(unittest.TestCase):
         html = page("PS5 Pro 콘솔 - 2TB 순차출고", "<button>구매하기</button>")
         self.assertEqual(m.parse_product(GETTHESE, html)["status"], "unknown")
 
-    def test_gmarket_soldout_near_item_heading(self):
-        html = page("PS5 Pro 콘솔 2TB", "<div>SOLD OUT</div>")
-        self.assertEqual(m.parse_product(GMARKET, html)["status"], "out_of_stock")
-
-    def test_gmarket_unrelated_soldout_not_accepted(self):
-        html = page("PS5 Pro 콘솔 2TB", "<button>구매하기</button>") + "SOLD OUT"
-        self.assertEqual(m.parse_product(GMARKET, html)["status"], "unknown")
 
 if __name__ == "__main__":
     unittest.main()
