@@ -191,7 +191,15 @@ def check(store):
             failures.append(f"{url.split('/')[2]} HTTP {exc.code}")
         except Exception as exc:
             failures.append(f"{url.split('/')[2]} {type(exc).__name__}")
-    return {"status": "unknown",
+    # HTTP 200 with a tiny interstitial lacking the product title is not
+    # useful stock data. Mark the source as inaccessible, not as "sold out".
+    if failures and all("HTTP 403" in detail for detail in failures) and unknowns:
+        status = "access_denied"
+    elif failures and not unknowns:
+        status = "access_denied"
+    else:
+        status = "unknown"
+    return {"status": status,
             "reason": "All SSG public page variants lacked verified stock signal: " +
                       "; ".join((unknowns + failures)[:8])}
 
