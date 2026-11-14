@@ -18,5 +18,10 @@
     "status": "out_of_stock",
     "reason": "structured offer says out of stock",
     "checked_at": "2026-11-14T18:26:30.166277+00:00"
+  },
+  "gmarket_playshop": {
+    "status": "access_denied",
+    "reason": "public HTTP request returned 403; direct stock check unavailable",
+    "checked_at": "2026-11-14T18:32:16.746221+00:00"
   }
 }
