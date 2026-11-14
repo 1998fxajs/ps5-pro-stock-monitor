@@ -41,11 +41,11 @@ EXCLUDE = re.compile(
 )
 SIGNAL = re.compile(r"판매|재고|입고|구매|추첨|응모|핫딜|특가|할인|프로모션|순차출고|오픈|물량", re.I)
 
-def request(url, data=None, headers=None):
+def request(url, data=None, headers=None, method=None):
     h = {"User-Agent": "Mozilla/5.0 (compatible; PS5ProPromoWatch/1.0)",
          "Accept": "application/rss+xml,application/json,text/xml"}
     h.update(headers or {})
-    with urllib.request.urlopen(urllib.request.Request(url, data=data, headers=h), timeout=20) as r:
+    with urllib.request.urlopen(urllib.request.Request(url, data=data, headers=h, method=method), timeout=20) as r:
         return r.read()
 
 def github(path, payload=None):
@@ -55,7 +55,8 @@ def github(path, payload=None):
          "Accept": "application/vnd.github+json",
          "Content-Type": "application/json"}
     data = json.dumps(payload).encode() if payload is not None else None
-    return json.loads(request(f"https://api.github.com/repos/{repo}/{path}", data, h))
+    return json.loads(request(f"https://api.github.com/repos/{repo}/{path}", data, h,
+                              method="PUT" if payload is not None else "GET"))
 
 def load_state():
     try:
