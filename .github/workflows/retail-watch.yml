@@ -7,10 +7,12 @@ on:
     branches: [main]
     paths:
       - retail_watch.py
+      - monitor_window.py
       - test_retail_watch.py
       - .github/workflows/retail-watch.yml
 permissions:
   contents: write
+  actions: write
 concurrency:
   group: ps5-pro-retail-check
   cancel-in-progress: false
@@ -20,9 +22,17 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
+      - name: Check monitoring deadline (Nov 19 KST)
+        id: window
+        run: python3 monitor_window.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW_FILENAME: retail-watch.yml
       - name: Run stock parser regression tests
+        if: steps.window.outputs.active == 'true'
         run: python3 -m unittest test_retail_watch.py -v
-      - name: Monitor three retailer product pages
+      - name: Monitor four retailer product pages
+        if: steps.window.outputs.active == 'true'
         run: python3 retail_watch.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
