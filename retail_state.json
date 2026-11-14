@@ -13,5 +13,10 @@
     "status": "unknown",
     "reason": "no validated explicit product-level in-stock signal",
     "checked_at": "2026-11-14T18:17:03.711236+00:00"
+  },
+  "getthese": {
+    "status": "out_of_stock",
+    "reason": "structured offer says out of stock",
+    "checked_at": "2026-11-14T18:26:30.166277+00:00"
   }
 }
