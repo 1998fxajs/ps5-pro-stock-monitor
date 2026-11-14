@@ -1,0 +1,7 @@
+{
+  "playshop": {
+    "status": "unavailable",
+    "reason": "GitHub runner received 404/410 for every public PlayShop product URL",
+    "changed_at": "2026-11-14T18:20:47.127422+00:00"
+  }
+}
