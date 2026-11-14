@@ -11,7 +11,12 @@ from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-PRODUCT_URL = "https://playshop.co.kr/product/detail.html?product_no=334"
+PRODUCT_URL = "https://playshop.co.kr/product/ps5-pro-%EC%BD%98%EC%86%94-2tb/334/category/29/display/1/"
+CHECK_URLS = [
+    PRODUCT_URL,
+    "https://ojinplaystation.cafe24.com/product/ps5-pro-%EC%BD%98%EC%86%94/334/",
+    "https://playshop.co.kr/product/detail.html?product_no=334",
+]
 PRICE_LIMIT = 1_298_000
 STATE_FILE = "monitor_state.json"
 USER_AGENT = "Mozilla/5.0 (compatible; PS5ProMonitor/1.0; public stock check)"
@@ -129,7 +134,19 @@ def alert(message):
         raise RuntimeError("Telegram API did not confirm alert")
 
 def main():
-    html = http(PRODUCT_URL)
+    html = None
+    failed_urls = []
+    for url in CHECK_URLS:
+        try:
+            html = http(url)
+            break
+        except HTTPError as exc:
+            if exc.code not in (404, 410):
+                raise
+            failed_urls.append(f"{url}: HTTP {exc.code}")
+    if html is None:
+        raise RuntimeError("All public PlayShop product URLs returned 404/410: " +
+                           "; ".join(failed_urls))
     result = check_playshop(html)
     status = result["status"]
     previous, sha = load_state()
