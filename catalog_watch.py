@@ -118,12 +118,21 @@ def discover(source, html):
     parser.feed(html)
     results = {}
     for href, title in parser.found:
-        if not acceptable_title(title):
-            continue
         url = urllib.parse.urljoin(source["url"], unescape(href))
-        if allow_url(url, source):
-            # Remove tracking query but retain product IDs when needed.
-            results[url] = re.sub(r"\s+", " ", unescape(title)).strip()[:140]
+        if not allow_url(url, source):
+            continue
+        # Cafe24 themes sometimes keep product names outside the <a> tag,
+        # but still put the full product name into the link's slug.
+        slug = urllib.parse.unquote(urllib.parse.urlparse(url).path)
+        slug_ok = (source["type"] == "cafe24"
+                   and re.search(r"ps5[-_\s]*pro|playstation[-_\s]*5[-_\s]*pro|플레이스테이션[-_\s]*5[-_\s]*프로", slug, re.I)
+                   and not EXCLUDE.search(slug)
+                   and not re.search(r"듀얼센스|디스크드라이브|번들|세트|중고|리퍼", slug, re.I))
+        if acceptable_title(title) or slug_ok:
+            label = re.sub(r"\s+", " ", unescape(title)).strip()[:140]
+            if not acceptable_title(label):
+                label = slug.rsplit("/", 2)[-2][:140]
+            results[url] = label
 
     # SSG also renders product entries as embedded itemNm/itemId JSON.
     if source["type"] == "ssg":
