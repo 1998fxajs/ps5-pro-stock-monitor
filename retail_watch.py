@@ -171,11 +171,15 @@ def parse_product(store, html):
         # Gmarket page-wide SOLD OUT can appear for recommended products;
         # restrict the signal to the heading and immediate purchase section.
         heading = re.search(
-            r"<h1\b[^>]*>\s*PS5\s*Pro\s*콘솔\s*2TB\s*</h1>",
+            r"<h1\b[^>]*>\s*PS5\s*Pro\s*콘솔\s*2TB\b",
             html, re.I | re.S,
         )
         if heading:
-            purchase = clean_text(html[heading.end():heading.end() + 9000])
+            # Consider only the beginning of this listing's main body. A
+            # generic page-wide SOLD OUT in recommendations is not enough.
+            body_end = html.lower().find("</body>", heading.end())
+            end = min(heading.end() + 9000, body_end if body_end >= 0 else len(html))
+            purchase = clean_text(html[heading.end():end])
             if re.search(r"\bSOLD\s*OUT\b", purchase, re.I):
                 return {"status": "out_of_stock", "reason": "sold-out label in primary Gmarket product panel"}
         # If HTML differs from the documented page, retain unknown.
