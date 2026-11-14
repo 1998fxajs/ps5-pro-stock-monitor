@@ -23,15 +23,26 @@ KST = timezone(timedelta(hours=9))
 UTC = timezone.utc
 MAX_AGE_HOURS = 3
 INITIAL_AGE_MINUTES = 30
+# Distinct aliases are intentionally split across queries. Marketplace promotions
+# may not be indexed by Google News; this is discovery, not direct stock checking.
 FEEDS = [
-    ("판매 예고", '"PS5 Pro" (판매 OR 재입고 OR 입고 OR 추첨 OR 응모)'),
-    ("국내 판매처", '"PS5 프로" (겟디즈 OR 겜우리 OR 플레이샵 OR 이마트 OR SSG OR 지마켓 OR 네이버 OR 디지털그랩 OR 래플즈 OR 오진상사)'),
-    ("특가", '"PS5 Pro" (핫딜 OR 특가 OR 프로모션 OR 할인 OR 판매)'),
-    ("커뮤니티 특가", '"PS5 Pro" (site:ppomppu.co.kr OR site:quasarzone.com OR site:ruliweb.com OR site:fmkorea.com)'),
-    ("마켓 프로모션", '("PS5 Pro" OR "플스5 프로") (G마켓 OR 지마켓 OR SSG OR 쓱 OR 네이버 OR 이마트 OR 디지털그랩 OR CJ온스타일 OR 쿠팡 OR 11번가) (판매 OR 재입고 OR 픽업 OR 특가 OR 추첨)'),
-    ("유통사/응모", '("PS5 Pro" OR "PS5 프로") (오진상사 OR 플레이샵 OR 컴퓨존 OR 겜우리 OR 겟디즈 OR THESE OR 래플 OR 톡딜) (판매 OR 응모 OR 재입고 OR 오픈)'),
+    ("영문명 판매·재입고", '("PS5 Pro" OR "PlayStation 5 Pro") (판매 OR 재입고 OR 입고 OR 추첨 OR 응모 OR 구매)'),
+    ("국문 PS5프로", '("PS5 프로" OR "PS5프로") (판매 OR 재고 OR 특가 OR 재입고 OR 선착순 OR 예약판매)'),
+    ("플레이스테이션5 프로", '("플레이스테이션5 프로" OR "플레이스테이션 5 프로" OR "플레이스테이션5프로") (판매 OR 입고 OR 추첨 OR 프로모션)'),
+    ("플스5 프로", '("플스5 프로" OR "플스 5 프로" OR "플스5프로" OR "플스 프로") (재고 OR 판매 OR 핫딜 OR 특가 OR 추첨)'),
+    ("모델번호 CFI-7122B", '("CFI-7122B" OR "CFI 7122B") (판매 OR 입고 OR 특가 OR 예약 OR 프로모션)'),
+    ("국내 마켓", '("PS5 Pro" OR "PS5 프로") (지마켓 OR G마켓 OR SSG OR 쓱 OR 이마트 OR 디지털그랩 OR 네이버 OR 네이버플러스스토어 OR 쿠팡 OR 11번가 OR 롯데온 OR 롯데하이마트)'),
+    ("공식·게임 전문점", '("PS5 Pro" OR "플스5 프로") (오진상사 OR 플레이샵 OR 컴퓨존 OR 겜우리 OR 겟디즈 OR 겟디스 OR get-these OR THESE OR 전자랜드)'),
+    ("뜻밖의 특가 판매처", '("PS5 Pro" OR "플레이스테이션5 프로") (4910 OR 무신사 OR 29CM OR 오늘의집 OR 카카오톡딜 OR 톡딜 OR 트레이더스 OR 당근 OR 크림 OR KREAM OR 래플 OR 래플즈)'),
+    ("국내 특가 커뮤니티", '("PS5 Pro" OR "PS5프로") (site:ppomppu.co.kr OR site:quasarzone.com OR site:ruliweb.com OR site:fmkorea.com OR site:hotdeal.zip)'),
+    ("판매 시작·한정 수량", '("PS5 Pro" OR "플레이스테이션 5 프로") ("한정수량" OR "선착순" OR "물량" OR "재판매" OR "판매 시작" OR "판매오픈" OR "순차출고")'),
 ]
-INCLUDE = re.compile(r"(?:\bps\s*5\s*pro\b|\bps5\s*프로\b|플레이스테이션\s*5?\s*프로|플스\s*5?\s*프로)", re.I)
+INCLUDE = re.compile(
+    r"(?:\bps\s*5\s*pro\b|\bplay\s*station\s*5\s*pro\b|"
+    r"ps\s*5\s*프로|플레이\s*스테이션\s*5?\s*(?:프로|pro)|"
+    r"플스\s*5?\s*(?:프로|pro)|cfi[-\s]*7122b)",
+    re.I,
+)
 EXCLUDE = re.compile(
     r"(?:\bGTA\s*(?:6|VI)\b|게임\s*타이틀|게임소프트|기프트\s*카드|포탈\s*플레이어|"
     r"울버린|듀얼센스\s*(?:단품|패드)|디스크\s*드라이브\s*(?:단품|별도)|"
@@ -39,7 +50,7 @@ EXCLUDE = re.compile(
     r"해외\s*직구|해외배송|미국\s*정품|해외\s*정품|예약\s*게임)",
     re.I,
 )
-SIGNAL = re.compile(r"판매|재고|입고|구매|추첨|응모|핫딜|특가|할인|프로모션|순차출고|오픈|물량", re.I)
+SIGNAL = re.compile(r"판매|재고|입고|구매|추첨|응모|핫딜|특가|할인|프로모션|순차출고|오픈|물량|한정수량|선착순|픽업|예약|래플|드롭|특판|구입가능|공구", re.I)
 
 def request(url, data=None, headers=None, method=None):
     h = {"User-Agent": "Mozilla/5.0 (compatible; PS5ProPromoWatch/1.0)",
