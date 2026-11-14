@@ -42,7 +42,11 @@ STORE_LISTS = [
         "id": "ssg",
         "name": "SSG / 이마트 새 판매 페이지",
         "url": "https://www.ssg.com/search.ssg?query=%ED%94%8C%EC%8A%A45%ED%94%84%EB%A1%9C",
-        "alternate_urls": ["https://emart.ssg.com/search.ssg?query=%ED%94%8C%EC%8A%A45%ED%94%84%EB%A1%9C"],
+        "alternate_urls": [
+            "https://emart.ssg.com/search.ssg?query=%ED%94%8C%EC%8A%A45%ED%94%84%EB%A1%9C",
+            "https://emart.ssg.com/disp/category.ssg?dispCtgId=6000214771",
+            "https://m.department.ssg.com/disp/category.ssg?ctgId=6000209317",
+        ],
         "domain": "ssg.com",
         "path_key": "item",
         "type": "ssg",
@@ -228,6 +232,9 @@ def main():
                             print(f"GetThese subcategory unavailable: {type(exc).__name__}: {exc}")
             except Exception as exc:
                 print(f"CATALOG UNAVAILABLE {src['name']}: {type(exc).__name__}: {exc}")
+                continue
+            if not matches:
+                print(f"NO VERIFIED PRODUCT LINKS {src['name']}: page accessible but no matching PS5 Pro listings; do not claim full listing coverage")
                 continue
             print(f"{src['name']}: {len(matches)} matching links")
             # First successful scan establishes baseline. Existing product
