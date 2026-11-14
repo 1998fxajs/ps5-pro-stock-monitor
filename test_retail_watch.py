@@ -1,0 +1,45 @@
+"""Offline regression tests; do not depend on retailer/network access."""
+import unittest
+import retail_watch as m
+
+GAME = m.STORES[0]
+SSG = m.STORES[1]
+COMPUZONE = m.STORES[2]
+
+def page(title, mark="", offers=""):
+    return f"<html><head><title>{title}</title>{offers}</head><body><h1>{title} {mark}</h1></body></html>"
+
+class RetailParsers(unittest.TestCase):
+    def test_gamewoori_sold_out(self):
+        html = page("PlayStation 5 프로 본체 2TB CFI-7122B", '<img alt="품절" src="/soldout.gif">')
+        self.assertEqual(m.parse_product(GAME, html)["status"], "out_of_stock")
+
+    def test_gamewoori_no_false_stock_from_buy_word(self):
+        html = page("PlayStation 5 프로 본체 2TB CFI-7122B", "<button>구매하기</button>")
+        self.assertEqual(m.parse_product(GAME, html)["status"], "unknown")
+
+    def test_ssg_sold_out(self):
+        html = page("플레이스테이션 5 프로", "sellStatCd=80")
+        self.assertEqual(m.parse_product(SSG, html)["status"], "out_of_stock")
+
+    def test_compuzone_not_buyable_from_generic_button(self):
+        html = page("PlayStation5 Pro 콘솔", "구매하기 입고예정 미정")
+        self.assertNotEqual(m.parse_product(COMPUZONE, html)["status"], "in_stock")
+
+    def test_structured_instocks_require_price_and_currency(self):
+        data = '{"@context":"https://schema.org","@type":"Product","name":"PlayStation 5 프로 본체 2TB CFI-7122B","offers":{"@type":"Offer","availability":"https://schema.org/InStock","price":"1298000","priceCurrency":"KRW"}}'
+        html = page("PlayStation 5 프로 본체 2TB CFI-7122B", offers=f'<script type="application/ld+json">{data}</script>')
+        self.assertEqual(m.parse_product(GAME, html)["status"], "in_stock")
+
+    def test_bundle_not_allowed(self):
+        data = '{"@type":"Product","name":"PlayStation 5 프로 본체 2TB CFI-7122B + 디스크 드라이브 세트","offers":{"availability":"https://schema.org/InStock","price":1298000,"priceCurrency":"KRW"}}'
+        html = page("PlayStation 5 프로 본체 2TB CFI-7122B", offers=f'<script type="application/ld+json">{data}</script>')
+        self.assertEqual(m.parse_product(GAME, html)["status"], "unknown")
+
+    def test_over_price_disallowed(self):
+        data = '{"@type":"Product","name":"PlayStation 5 프로 본체 2TB CFI-7122B","offers":{"availability":"https://schema.org/InStock","price":1398000,"priceCurrency":"KRW"}}'
+        html = page("PlayStation 5 프로 본체 2TB CFI-7122B", offers=f'<script type="application/ld+json">{data}</script>')
+        self.assertNotEqual(m.parse_product(GAME, html)["status"], "in_stock")
+
+if __name__ == "__main__":
+    unittest.main()
