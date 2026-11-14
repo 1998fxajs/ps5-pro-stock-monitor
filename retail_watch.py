@@ -44,12 +44,12 @@ STORES = [
     },
 ]
 
-def fetch(url, data=None, headers=None):
+def fetch(url, data=None, headers=None, method=None):
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; PS5ProWatch/1.0; public retail page)",
         "Accept": "text/html,application/json",
     } | (headers or {})
-    request = urllib.request.Request(url, data=data, headers=headers)
+    request = urllib.request.Request(url, data=data, headers=headers, method=method)
     with urllib.request.urlopen(request, timeout=19) as response:
         content = response.read()
         charset = response.headers.get_content_charset()
@@ -171,7 +171,8 @@ def gh(path, payload=None):
         "X-GitHub-Api-Version": "2022-11-28",
     }
     payload_bytes = json.dumps(payload).encode() if payload is not None else None
-    return json.loads(fetch(f"https://api.github.com/repos/{repo}/{path}", payload_bytes, headers))
+    return json.loads(fetch(f"https://api.github.com/repos/{repo}/{path}", payload_bytes, headers,
+                            method="PUT" if payload is not None else "GET"))
 
 def load_state():
     try:
