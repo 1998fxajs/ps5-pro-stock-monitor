@@ -37,6 +37,10 @@ FEEDS = [
     ("국내 특가 커뮤니티", '("PS5 Pro" OR "PS5프로") (site:ppomppu.co.kr OR site:quasarzone.com OR site:ruliweb.com OR site:fmkorea.com OR site:hotdeal.zip)'),
     ("판매 시작·한정 수량", '("PS5 Pro" OR "플레이스테이션 5 프로") ("한정수량" OR "선착순" OR "물량" OR "재판매" OR "판매 시작" OR "판매오픈" OR "순차출고")'),
 ]
+COMMUNITY_RSS = [
+    ("뽐뿌 핫딜 직접 RSS", "https://www.ppomppu.co.kr/rss.php?id=ppomppu"),
+    ("뽐뿌 오프라인 특가 직접 RSS", "https://www.ppomppu.co.kr/rss.php?id=ppomppu5"),
+]
 INCLUDE = re.compile(
     r"(?:\bps\s*5\s*pro\b|\bplay\s*station\s*5\s*pro\b|"
     r"ps\s*5\s*프로|플레이\s*스테이션\s*5?\s*(?:프로|pro)|"
@@ -119,6 +123,27 @@ def read_feed(label, query):
         yield {"title": title, "link": link, "published": published, "source": label}
     print(f"{label}: {count} matching headlines")
 
+def read_community_rss(label, url):
+    """Best-effort community RSS, independently of Google News indexing."""
+    root = ET.fromstring(request(url))
+    count = 0
+    for item in root.findall(".//channel/item"):
+        title = unescape((item.findtext("title", default="") or "").strip())
+        link = (item.findtext("link", default="") or "").strip()
+        raw_pub = (item.findtext("pubDate", default="") or "").strip()
+        if not title or not link or not raw_pub:
+            continue
+        if not INCLUDE.search(title) or EXCLUDE.search(title) or not SIGNAL.search(title):
+            continue
+        try:
+            published = email.utils.parsedate_to_datetime(raw_pub).astimezone(UTC)
+        except (ValueError, TypeError, IndexError):
+            continue
+        count += 1
+        yield {"title": title, "link": link, "published": published, "source": label}
+    print(f"{label}: {count} matching community posts")
+
+
 def main():
     state, sha = load_state()
     seen = set(state.get("seen", []))
@@ -137,7 +162,18 @@ def main():
         except Exception as exc:
             failures += 1
             print(f"Feed {label} unavailable: {type(exc).__name__}: {exc}", file=sys.stderr)
-    if failures == len(FEEDS):
+    community_failures = 0
+    for label, url in COMMUNITY_RSS:
+        try:
+            for item in read_community_rss(label, url):
+                if item["published"] >= threshold:
+                    key = hashlib.sha256(item["link"].encode()).hexdigest()[:24]
+                    if key not in seen:
+                        items[key] = item
+        except Exception as exc:
+            community_failures += 1
+            print(f"Community RSS {label} unavailable: {type(exc).__name__}: {exc}", file=sys.stderr)
+    if failures == len(FEEDS) and community_failures == len(COMMUNITY_RSS):
         raise RuntimeError("All public discovery feeds failed; no coverage")
 
     count = 0
@@ -158,7 +194,7 @@ def main():
     state["seen"] = sorted(seen)[-1500:]
     state["updated_at"] = datetime.now(UTC).isoformat()
     save_state(state, sha)
-    print(f"Promo discovery complete; delivered {count} new lead alert(s); failed feeds: {failures}")
+    print(f"Promo discovery complete; delivered {count} new lead alert(s); failed Google News feeds: {failures}; failed community feeds: {community_failures}")
 
 if __name__ == "__main__":
     main()
