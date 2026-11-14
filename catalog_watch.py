@@ -32,7 +32,7 @@ STORE_LISTS = [
     {
         "id": "getthese",
         "name": "겟디즈 상품 카테고리",
-        "url": "https://get-these.com/product/list.html?cate_no=23",
+        "url": "https://get-these.com/category/product/23/",
         "domain": "get-these.com",
         "path_key": "product",
         "type": "cafe24",
@@ -178,7 +178,28 @@ def main():
         for future in concurrent.futures.as_completed(tasks):
             src = tasks[future]
             try:
-                matches = discover(src, future.result())
+                html = future.result()
+                matches = discover(src, html)
+                if src["id"] == "getthese":
+                    # The store may place newly published consoles in a
+                    # separate PlayStation subcategory rather than the main
+                    # product category (cate_no=23).
+                    nav = Links()
+                    nav.feed(html)
+                    subcategories = []
+                    for href, title in nav.found:
+                        url = urllib.parse.urljoin(src["url"], unescape(href))
+                        host = urllib.parse.urlparse(url).hostname or ""
+                        if (("플레이스테이션" in title or "PlayStation" in title)
+                            and host in ("get-these.com", "www.get-these.com")
+                            and ("/category/" in url or "cate_no=" in url)):
+                            subcategories.append(url)
+                    for url in sorted(set(subcategories))[:2]:
+                        try:
+                            matches.update(discover(src, request(url)))
+                            print(f"GetThese PlayStation subcategory checked: {url}")
+                        except Exception as exc:
+                            print(f"GetThese subcategory unavailable: {type(exc).__name__}: {exc}")
             except Exception as exc:
                 print(f"CATALOG UNAVAILABLE {src['name']}: {type(exc).__name__}: {exc}")
                 continue
@@ -203,7 +224,7 @@ def main():
     # Send one compact digest if many new URLs appear in the same run.
     if alerts:
         groups = [alerts[i:i + MAX_ALERTS] for i in range(0, len(alerts), MAX_ALERTS)]
-        for group in groups[:2]:
+        for group in groups:
             entries = "\n\n".join(
                 f"{name}\n{title}\n{url}" for name, title, url in group)
             telegram("[PS5 Pro 새 판매 페이지 발견 — 확인 필요]\n"
