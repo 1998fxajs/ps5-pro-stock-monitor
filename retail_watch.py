@@ -33,8 +33,13 @@ STORES = [
         "id": "ssg_emart",
         "name": "이마트몰 / SSG",
         "url": "https://emart.ssg.com/item/itemDtl.ssg?itemId=1000619325394",
+        "alternate_urls": [
+            "https://m.ssg.com/item/itemView.ssg?itemId=1000619325394",
+            "https://shinsegaemall.ssg.com/item/itemView.ssg?itemId=1000619325394",
+            "https://www.ssg.com/item/itemView.ssg?itemId=1000619325394",
+        ],
         "type": "ssg",
-        "title": r"플레이스테이션\s*5\s*프로",
+        "title": r"(?:플레이스테이션\s*5\s*프로|PS\s*5\s*Pro)",
     },
     {
         "id": "compuzone",
@@ -167,7 +172,28 @@ def parse_product(store, html):
     return {"status": "unknown", "reason": "no validated explicit product-level in-stock signal"}
 
 def check(store):
-    return parse_product(store, fetch(store["url"]))
+    if store["type"] != "ssg":
+        return parse_product(store, fetch(store["url"]))
+    # Each of these are SSG's ordinary public product-page URLs for the
+    # same verified item ID. No login, CAPTCHA, proxy, or protection bypass.
+    failures = []
+    unknowns = []
+    for url in [store["url"]] + store.get("alternate_urls", []):
+        try:
+            html = fetch(url)
+            result = parse_product(store, html)
+            print(f"SSG PUBLIC PAGE: {url.split('/')[2]} HTTP 200, bytes={len(html)}, parsed={result['status']}")
+            if result["status"] != "unknown":
+                result["checked_url"] = url
+                return result
+            unknowns.append(result["reason"])
+        except HTTPError as exc:
+            failures.append(f"{url.split('/')[2]} HTTP {exc.code}")
+        except Exception as exc:
+            failures.append(f"{url.split('/')[2]} {type(exc).__name__}")
+    return {"status": "unknown",
+            "reason": "All SSG public page variants lacked verified stock signal: " +
+                      "; ".join((unknowns + failures)[:8])}
 
 def gh(path, payload=None):
     repo = os.environ["GITHUB_REPOSITORY"]
