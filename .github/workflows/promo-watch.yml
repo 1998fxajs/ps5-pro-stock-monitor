@@ -1,4 +1,4 @@
-name: PS5 Pro promotion discovery
+name: PS5 Pro promotion and new listing discovery
 on:
   schedule:
     - cron: '2-59/5 * * * *'
@@ -7,23 +7,42 @@ on:
     branches: [main]
     paths:
       - promo_watch.py
+      - catalog_watch.py
+      - monitor_window.py
       - test_promo_watch.py
+      - test_catalog_watch.py
       - .github/workflows/promo-watch.yml
 permissions:
   contents: write
+  actions: write
 concurrency:
   group: ps5-pro-promo-watch
   cancel-in-progress: false
 jobs:
   discover:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
-      - name: Run announcement keyword tests
-        run: python3 -m unittest test_promo_watch.py -v
-      - name: Discover newly announced deals and lotteries
+      - name: Check monitoring deadline (Nov 19 KST)
+        id: window
+        run: python3 monitor_window.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW_FILENAME: promo-watch.yml
+      - name: Verify announcement and listing parsers
+        if: steps.window.outputs.active == 'true'
+        run: python3 -m unittest test_promo_watch.py test_catalog_watch.py -v
+      - name: Discover fresh sales and promotion announcements
+        if: steps.window.outputs.active == 'true'
         run: python3 promo_watch.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - name: Discover newly created product listings
+        if: steps.window.outputs.active == 'true'
+        run: python3 catalog_watch.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
