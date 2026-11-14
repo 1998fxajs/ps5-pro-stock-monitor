@@ -114,7 +114,7 @@ def allow_url(url, source):
         )
     if source["type"] == "ssg":
         return "itemview.ssg" in path or "itemdtl.ssg" in path
-    return "product" in path and ("productno=" in parsed.query.lower() or path.endswith(".htm"))
+    return "product_detail.htm" in path and "productno=" in parsed.query.lower()
 
 def discover(source, html):
     parser = Links()
