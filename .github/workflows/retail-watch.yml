@@ -3,6 +3,12 @@ on:
   schedule:
     - cron: '1-59/5 * * * *'
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - retail_watch.py
+      - test_retail_watch.py
+      - .github/workflows/retail-watch.yml
 permissions:
   contents: write
 concurrency:
@@ -14,6 +20,8 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
+      - name: Run stock parser regression tests
+        run: python3 -m unittest test_retail_watch.py -v
       - name: Monitor three retailer product pages
         run: python3 retail_watch.py
         env:
