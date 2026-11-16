@@ -4,6 +4,21 @@ import promo_watch as p
 
 
 class PromoTitleTests(unittest.TestCase):
+    def test_feed_carries_article_body_links_for_review(self):
+        from unittest.mock import patch
+        xml = (b'<rss><channel><item><title>PS5 Pro 2TB \\xec\\x9d\\x91\\xeb\\xaa\\xa8</title></item></channel></rss>')
+        # Use UTF-8 XML with CDATA, which is how many RSS sources embed links.
+        rss = """<rss><channel><item>
+            <title>PS5 Pro 2TB 응모 추첨</title>
+            <link>https://example.com/notice/123</link>
+            <pubDate>Mon, 16 Nov 2026 09:00:00 GMT</pubDate>
+            <description><![CDATA[<a href="https://playshop.co.kr/board/online_entry/list.html?board_no=16">응모 링크</a>]]></description>
+            </item></channel></rss>""".encode("utf-8")
+        with patch.object(p, "request", return_value=rss):
+            items = list(p.read_feed("응모", "PS5 Pro 응모"))
+        self.assertEqual(len(items), 1)
+        self.assertIn("online_entry", items[0]["description"])
+
     def test_product_aliases(self):
         titles = [
             "PS5 Pro 2TB 재입고", "PS5프로 정가 판매",
