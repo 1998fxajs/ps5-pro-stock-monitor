@@ -28,9 +28,9 @@ URLS = [
 DIRECT_URL = URLS[0]
 SINGLE = re.compile(r"PS5\s*Pro\s*콘솔\s*[-–]\s*2TB", re.I)
 FIELD = re.compile(r"뱃지\s*문구")
-PRICE = re.compile(r"판매가\s*[:：]?\s*([0-9,]+)\s*원?")
-START = re.compile(r"응모\s*시작일시\s*[:：]?\s*(20\d\d)[./-](\d{1,2})[./-](\d{1,2})\s*(\d{1,2}):(\d{2})")
-END = re.compile(r"응모\s*종료일시\s*[:：]?\s*(20\d\d)[./-](\d{1,2})[./-](\d{1,2})\s*(\d{1,2}):(\d{2})")
+PRICE = re.compile(r"판매가\s*[|:：]?\s*([0-9,]+)\s*원?")
+START = re.compile(r"응모\s*시작일시\s*[|:：]?\s*(20\d\d)[./-](\d{1,2})[./-](\d{1,2})\s*(\d{1,2}):(\d{2})")
+END = re.compile(r"응모\s*종료일시\s*[|:：]?\s*(20\d\d)[./-](\d{1,2})[./-](\d{1,2})\s*(\d{1,2}):(\d{2})")
 MAX_KRW = 1_298_000
 
 class Text(HTMLParser):
