@@ -7,6 +7,8 @@ on:
     branches: [main]
     paths:
       - promo_watch.py
+      - dcinside_watch.py
+      - test_dcinside_watch.py
       - catalog_watch.py
       - monitor_window.py
       - test_promo_watch.py
@@ -32,7 +34,7 @@ jobs:
           WORKFLOW_FILENAME: promo-watch.yml
       - name: Verify announcement and listing parsers
         if: steps.window.outputs.active == 'true'
-        run: python3 -m unittest test_promo_watch.py test_catalog_watch.py -v
+        run: python3 -m unittest test_promo_watch.py test_catalog_watch.py test_dcinside_watch.py -v
       - name: Discover fresh sales and promotion announcements
         if: steps.window.outputs.active == 'true'
         run: python3 promo_watch.py
@@ -43,6 +45,13 @@ jobs:
       - name: Discover newly created product listings
         if: steps.window.outputs.active == 'true'
         run: python3 catalog_watch.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - name: Discover DC Inside new PS5 Pro sale posts
+        if: steps.window.outputs.active == 'true'
+        run: python3 dcinside_watch.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
