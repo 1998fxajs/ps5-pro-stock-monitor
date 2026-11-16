@@ -197,10 +197,12 @@ def main():
         )
         seen.add(key)
         count += 1
-    # Store only recent keys to avoid growing forever; keep bounded history.
-    state["seen"] = sorted(seen)[-1500:]
-    state["updated_at"] = datetime.now(UTC).isoformat()
-    save_state(state, sha)
+    # Avoid a needless GitHub commit on every 5-minute scan when nothing
+    # has changed. Create baseline once, then save only on new alerts.
+    if count or sha is None:
+        state["seen"] = sorted(seen)[-1500:]
+        state["updated_at"] = datetime.now(UTC).isoformat()
+        save_state(state, sha)
     print(f"Promo discovery complete; delivered {count} new lead alert(s); failed Google News feeds: {failures}; failed community feeds: {community_failures}")
 
 if __name__ == "__main__":
