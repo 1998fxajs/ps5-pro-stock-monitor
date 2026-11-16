@@ -30,7 +30,8 @@
 
 1. **[판매처 감시](https://github.com/1998fxajs/ps5-pro-stock-monitor/actions/workflows/retail-watch.yml)**: 겜우리, 이마트몰/SSG, 컴퓨존, 겟디즈의 공개 단품 상품 페이지를 약 5분 주기로 조회. GitHub Actions 실행시각은 지연되거나 누락될 수 있습니다.
 2. **[판매글·특가·추첨 발견](https://github.com/1998fxajs/ps5-pro-stock-monitor/actions/workflows/promo-watch.yml)**: Google 뉴스 RSS에서 PS5 Pro, PS5프로, 플레이스테이션5 프로, 플스5프로, CFI-7122B 및 G마켓 전용 검색을 포함한 11개 검색 그룹을 확인하고, 같은 워크플로에서 새 상품 페이지 링크도 검사합니다. 뽐뿌 공개 RSS 두 곳도 별도로 시도합니다.
-3. **[텔레그램 메시지 테스트](https://github.com/1998fxajs/ps5-pro-stock-monitor/actions/workflows/test-telegram.yml)**: 수동 테스트. 사용자 휴대폰 수신 확인 완료.
+3. **디시인사이드**: Google 뉴스에 디시인사이드 전용 검색어를 추가했고, 공개된 **핫딜·할인상품·PlayStation 갤러리 첫 페이지**의 새 게시글도 직접 확인합니다 (`dcinside_watch.py`). 직접 조회가 막히면 로그에 기록하며, 게시글은 재고·정가 검증 전의 참고 알림입니다.
+4. **[텔레그램 메시지 테스트](https://github.com/1998fxajs/ps5-pro-stock-monitor/actions/workflows/test-telegram.yml)**: 수동 테스트. 사용자 휴대폰 수신 확인 완료.
 
 모든 알림은 `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` GitHub Actions Secrets를 통해 전송합니다. 자격정보를 코드에 업로드하지 마세요.
 
