@@ -8,6 +8,8 @@ on:
     branches: [main]
     paths:
       - promo_watch.py
+      - sale_link_review.py
+      - test_sale_link_review.py
       - catalog_watch.py
       - dcinside_watch.py
       - watch_loop.py
@@ -37,7 +39,7 @@ jobs:
           WORKFLOW_FILENAME: promo-watch.yml
       - name: Verify announcement, listing, DC, and loop parsers
         if: steps.window.outputs.active == 'true'
-        run: python3 -m unittest test_promo_watch.py test_catalog_watch.py test_dcinside_watch.py test_watch_loop.py -v
+        run: python3 -m unittest test_promo_watch.py test_catalog_watch.py test_dcinside_watch.py test_watch_loop.py test_sale_link_review.py -v
       - name: Poll new sale posts and product listings every five minutes
         if: steps.window.outputs.active == 'true'
         run: python3 -u watch_loop.py promo --duration-minutes "$DURATION_MINUTES"
