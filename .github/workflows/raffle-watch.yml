@@ -1,0 +1,41 @@
+name: Official PS5 Pro single-console raffle notices
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - raffle_watch.py
+      - sale_link_review.py
+      - test_raffle_watch.py
+      - test_sale_link_review.py
+      - .github/workflows/raffle-watch.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: ps5-pro-official-raffle
+  cancel-in-progress: false
+jobs:
+  verify-and-notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Nov 19 cutoff
+        id: window
+        run: python3 monitor_window.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW_FILENAME: raffle-watch.yml
+      - name: Verify page-content and direct-link classifiers
+        if: steps.window.outputs.active == 'true'
+        run: python3 -m unittest test_raffle_watch.py test_sale_link_review.py -v
+      - name: Check PlayShop official standalone raffle
+        if: steps.window.outputs.active == 'true'
+        run: python3 -u raffle_watch.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
