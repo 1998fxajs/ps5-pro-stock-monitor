@@ -1,0 +1,27 @@
+name: Validate PS5 Pro discovery configuration
+on:
+  push:
+    branches: [main]
+    paths:
+      - promo_watch.py
+      - test_promo_watch.py
+      - .github/workflows/validate-discovery.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test promotion keyword and PlayShop search coverage
+        run: python3 -m unittest test_promo_watch.py -v
+      - name: Confirm no PlayShop direct inventory polling
+        run: |
+          python3 - <<'PY'
+          import retail_watch, catalog_watch
+          ids = [s["id"] for s in retail_watch.STORES] + [s["id"] for s in catalog_watch.STORE_LISTS]
+          assert "playshop" not in ids and "ojin" not in ids, ids
+          print("PlayShop/Ojin remain search-only")
+          PY
