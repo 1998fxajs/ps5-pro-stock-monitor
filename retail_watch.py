@@ -136,6 +136,14 @@ def structured_status(html, store):
             if availability in ("outofstock", "soldout", "discontinued"):
                 return {"status": "out_of_stock", "reason": "structured offer says out of stock"}
             if availability == "instock" and currency == "KRW" and price is not None and price <= PRICE_CEILING:
+                # GetThese's structured Offer availability has previously
+                # flipped from InStock to OutOfStock within 15 minutes. It
+                # does not independently prove the checkout accepts orders.
+                # Do not label this unconfirmed schema signal as real stock.
+                if store["id"] == "getthese":
+                    return {"status": "stock_signal",
+                            "reason": "GetThese structured Offer=InStock; checkout not confirmed",
+                            "price": price}
                 return {"status": "in_stock", "reason": "explicit product offer says InStock", "price": price}
             if availability == "instock" and currency == "KRW" and price is not None and price > PRICE_CEILING:
                 return {"status": "over_budget", "reason": "explicit offer above standalone ceiling", "price": price}
@@ -285,6 +293,15 @@ def main():
                 f"{site['name']} | {result['price']:,}원\n"
                 f"{site['url']}\n"
                 "결제 가능 여부와 단품 구성은 최종 확인하세요."
+            )
+        elif current == "stock_signal" and previous != "stock_signal":
+            telegram(
+                "[PS5 Pro 재고 표기 변동 — 실제 구매 가능 여부 미확인]\n"
+                f"{site['name']} | 사이트 표기 {result['price']:,}원\n"
+                f"{site['url']}\n"
+                "판매처의 공개 상품 데이터가 InStock으로 바뀌었지만 "
+                "실제 주문 가능 여부는 확인되지 않았습니다. "
+                "품절로 표시될 수도 있으니 상품 페이지를 확인하세요."
             )
         elif current == "access_denied" and previous != "access_denied":
             telegram(
