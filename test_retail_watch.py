@@ -42,6 +42,11 @@ class RetailParsers(unittest.TestCase):
         html = page("PlayStation 5 프로 본체 2TB CFI-7122B", offers=f'<script type="application/ld+json">{data}</script>')
         self.assertNotEqual(m.parse_product(GAME, html)["status"], "in_stock")
 
+    def test_getthese_schema_instocks_are_not_confirmed_buyable(self):
+        data = '{"@type":"Product","name":"PS5 Pro 콘솔 - 2TB 순차출고","offers":{"availability":"https://schema.org/InStock","price":1298000,"priceCurrency":"KRW"}}'
+        html = page("PS5 Pro 콘솔 - 2TB 순차출고", offers=f'<script type="application/ld+json">{data}</script>')
+        self.assertEqual(m.parse_product(GETTHESE, html)["status"], "stock_signal")
+
     def test_getthese_soldout_in_heading(self):
         html = page("PS5 Pro 콘솔 - 2TB 순차출고", '<img alt="품절" src="soldout.png">')
         self.assertEqual(m.parse_product(GETTHESE, html)["status"], "out_of_stock")
