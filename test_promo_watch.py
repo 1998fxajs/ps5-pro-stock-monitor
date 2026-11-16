@@ -31,6 +31,15 @@ class PromoTitleTests(unittest.TestCase):
             with self.subTest(title=title):
                 self.assertIsNotNone(p.EXCLUDE.search(title), title)
 
+    def test_playshop_search_only_coverage(self):
+        queries = " ".join(query for label, query in p.FEEDS if "플레이샵" in label)
+        self.assertIn("플레이샵", queries)
+        self.assertIn("오진상사", queries)
+        self.assertIn("site:playshop.co.kr", queries)
+        self.assertIn("site:ojinplaystation.cafe24.com", queries)
+        self.assertIn("site:ppomppu.co.kr", queries)
+        self.assertGreaterEqual(len([1 for label, _ in p.FEEDS if "플레이샵" in label]), 3)
+
     def test_search_coverage(self):
         queries = " ".join(query for _, query in p.FEEDS)
         self.assertGreaterEqual(len(p.FEEDS), 10)
