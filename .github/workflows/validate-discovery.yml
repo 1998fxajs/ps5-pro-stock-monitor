@@ -9,6 +9,8 @@ on:
       - test_sale_link_review.py
       - raffle_watch.py
       - test_raffle_watch.py
+      - retail_watch.py
+      - test_retail_watch.py
       - .github/workflows/validate-discovery.yml
   workflow_dispatch:
 permissions:
@@ -20,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test promotion keyword and PlayShop search coverage
-        run: python3 -m unittest test_promo_watch.py test_sale_link_review.py test_raffle_watch.py -v
+        run: python3 -m unittest test_promo_watch.py test_sale_link_review.py test_raffle_watch.py test_retail_watch.py -v
       - name: Confirm no PlayShop direct inventory polling
         run: |
           python3 - <<'PY'
