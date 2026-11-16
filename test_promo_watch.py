@@ -6,7 +6,6 @@ import promo_watch as p
 class PromoTitleTests(unittest.TestCase):
     def test_feed_carries_article_body_links_for_review(self):
         from unittest.mock import patch
-        xml = (b'<rss><channel><item><title>PS5 Pro 2TB \\xec\\x9d\\x91\\xeb\\xaa\\xa8</title></item></channel></rss>')
         # Use UTF-8 XML with CDATA, which is how many RSS sources embed links.
         rss = """<rss><channel><item>
             <title>PS5 Pro 2TB 응모 추첨</title>
