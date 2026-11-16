@@ -6,6 +6,7 @@ public discovery source and can be delayed, incomplete, or rate limited.
 """
 import base64
 import monitor_window
+import sale_link_review
 import email.utils
 import hashlib
 import json
@@ -127,7 +128,8 @@ def read_feed(label, query):
         if not INCLUDE.search(title) or EXCLUDE.search(title) or not SIGNAL.search(title):
             continue
         count += 1
-        yield {"title": title, "link": link, "published": published, "source": label}
+        yield {"title": title, "link": link, "published": published, "source": label,
+               "description": item.findtext("description", default="") or ""}
     print(f"{label}: {count} matching headlines")
 
 def read_community_rss(label, url):
@@ -147,7 +149,8 @@ def read_community_rss(label, url):
         except (ValueError, TypeError, IndexError):
             continue
         count += 1
-        yield {"title": title, "link": link, "published": published, "source": label}
+        yield {"title": title, "link": link, "published": published, "source": label,
+               "description": item.findtext("description", default="") or ""}
     print(f"{label}: {count} matching community posts")
 
 
@@ -188,18 +191,17 @@ def main():
 
     count = 0
     for key, item in sorted(items.items(), key=lambda kv: kv[1]["published"]):
-        # An explicit LEAD message: not stock confirmation or automatic purchase.
-        telegram(
-            "[PS5 Pro 판매 정보 확인 필요]\n"
-            f"출처 분류: {item['source']}\n"
-            f"제목: {item['title']}\n"
-            f"게시시각: {item['published'].astimezone(KST):%m-%d %H:%M} KST\n"
-            f"링크: {item['link']}\n\n"
-            "이 알림은 구매 가능한 재고를 검증한 것이 아닙니다. "
-            "본체 단품/실제 가격/판매 시각을 직접 확인하세요."
-        )
+        # Review source body and candidate product/raffle URLs; don't present
+        # a Google News wrapper as the purchase link when a direct link exists.
+        lead = sale_link_review.inspect(
+            item["title"], item["link"], item.get("description", ""))
+        if lead is not None:
+            telegram(sale_link_review.format_alert(
+                lead, item["source"], item["published"]))
+            count += 1
+        else:
+            print(f"Rejected stale/closed/irrelevant sale post: {item['title'][:140]}")
         seen.add(key)
-        count += 1
     # Avoid a needless GitHub commit on every 5-minute scan when nothing
     # has changed. Create baseline once, then save only on new alerts.
     if count or sha is None:
