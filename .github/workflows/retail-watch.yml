@@ -39,7 +39,7 @@ jobs:
         if: steps.window.outputs.active == 'true'
         run: python3 -u watch_loop.py retail --duration-minutes "$DURATION_MINUTES"
         env:
-          DURATION_MINUTES: ${{ github.event_name == 'push' && '1' || '140' }}
+          DURATION_MINUTES: '140'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
