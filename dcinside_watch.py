@@ -14,6 +14,7 @@ from html.parser import HTMLParser
 from urllib.error import HTTPError
 
 import monitor_window
+import sale_link_review
 from promo_watch import INCLUDE, EXCLUDE, SIGNAL, github, request, telegram
 
 STATE_PATH = "dcinside_seen.json"
@@ -120,9 +121,18 @@ def main():
             fresh = [(num, *posts[num]) for num in posts if num not in seen]
             for number, title, post_url in fresh:
                 if relevant(title):
-                    telegram("[PS5 Pro 디시 새 판매글 - 확인 필요]\n"
-                             f"갤러리: {label}\n제목: {title}\n{post_url}\n"
-                             "재고와 가격은 아직 검증되지 않았습니다.")
+                    # Open the public post when possible and prefer its actual
+                    # purchase or raffle URL over just the discussion link.
+                    lead = sale_link_review.inspect(title, post_url)
+                    if lead is None:
+                        print(f"DC {label}: skipped ended/irrelevant sale report {number}")
+                        continue
+                    direct_kind = "게시글 내 구매·응모 링크" if lead["direct_link"] else "게시글 (직접 링크 미확인)"
+                    telegram("[PS5 Pro 디시 새 판매 정보 - 확인 필요]\n"
+                             f"갤러리: {label}\n제목: {title}\n"
+                             f"{direct_kind}: {lead['link']}\n"
+                             f"게시글 원문: {post_url}\n"
+                             "상품 구성·가격·실제 재고를 확인하세요.")
                     new_count += 1
             updated = (list(dict.fromkeys(old + list(posts)))[-MAX_POSTS:])
             if updated != old:
