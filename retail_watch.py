@@ -38,6 +38,8 @@ STORES = [
     {
         "id": "naver_playshop",
         "name": "네이버 PlayShop / 오진상사 (공식 인증점)",
+        # Keep access failures in logs/state and retry, without Telegram noise.
+        "notify_access_issues": False,
         "url": "https://brand.naver.com/playshop/products/10897976014",
         "catalogue_url": "https://brand.naver.com/playshop/category/573e641896a64ee9a94ef552b6df37d4?cp=1",
         "type": "naver",
@@ -381,7 +383,8 @@ def main():
                 '추첨 상품의 품절 표기가 해제됐습니다. 응모 기간과 조건을 확인하세요. '
                 '응모용 표시 가격을 본체 판매가격으로 취급하지 않습니다.'
             )
-        elif current == "access_denied" and previous != "access_denied":
+        elif (current == "access_denied" and previous != "access_denied"
+              and site.get('notify_access_issues', True)):
             telegram(
                 "[PS5 Pro 감시 장애 - 접근 제한 가능성]\n"
                 f"{site['name']}\n{site['url']}\n"
@@ -398,7 +401,8 @@ def main():
             )
         previous_direct = state.get(key, {}).get('direct_status')
         direct_failures = ('access_denied', 'unavailable', 'unknown')
-        if (result.get('direct_status') in direct_failures and current not in direct_failures
+        if (site.get('notify_access_issues', True)
+                and result.get('direct_status') in direct_failures and current not in direct_failures
                 and previous_direct not in direct_failures):
             telegram(
                 '[PS5 Pro 직접 감시 일부 제한 — 공식 목록 보조 확인]\n'
