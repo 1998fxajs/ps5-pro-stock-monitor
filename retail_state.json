@@ -23,5 +23,10 @@
     "status": "access_denied",
     "reason": "public HTTP request returned 403; direct stock check unavailable",
     "checked_at": "2026-11-14T18:32:16.746221+00:00"
+  },
+  "coupang_reported": {
+    "status": "access_denied",
+    "reason": "public HTTP request returned 403; direct stock check unavailable",
+    "checked_at": "2026-11-17T04:48:45.487400+00:00"
   }
 }
