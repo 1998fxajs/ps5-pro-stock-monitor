@@ -1,0 +1,31 @@
+name: Replay actual Nov 16 23h posts and labelled alerts
+on:
+  push:
+    branches: [main]
+    paths:
+      - replay_historical_posts.py
+      - .github/workflows/replay-historical-posts.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Korean and English photo reading
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-kor
+      - name: Re-read actual hour and send only accepted historical examples
+        run: python3 -u replay_historical_posts.py
+        env:
+          SEND_HISTORICAL_TEST: ${{ github.run_attempt == 1 && '1' || '0' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - name: Preserve per-post decisions and actual delivery receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-post-replay
+          path: historical-replay-report.json
+          if-no-files-found: warn

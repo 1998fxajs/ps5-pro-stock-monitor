@@ -185,11 +185,13 @@ HARDWARE = re.compile(r'본체|콘솔|2\s*TB|CFI[-\s]*7122B',re.I)
 RESTOCK = re.compile(r'풀렸|풀림|풀린|떴|떳|뜬|입고|취소분|취소\s*할|물량|응모|추첨',re.I)
 OWNER = re.compile(r'^(?:\s*(?:오우너|소유|보유|쓰고|사용|가지고|지원)|(?:에서|으로|로)\s*(?:플레이|돌리|게임))',re.I)
 COMPATIBILITY = re.compile(r'(?:PS\s*5\s*Pro|플스\s*5?\s*프로|프로)\s*(?:용|호환|전용|에서|지원)',re.I)
-PURCHASE_STORY = re.compile(r'샀|사서|구매\s*(?:함|했|완료|인증|후기|성공)|구입\s*(?:함|했|완료|인증)|결제\s*(?:했|완료)|주문\s*(?:했|완료)|먹었|질렀|지름|도착|수령|언박싱|개봉|뜯고|오우너|자랑', re.I)
+PURCHASE_STORY = re.compile(r'샀|사서|산\s*사람|사버렸|구매\s*(?:함|했|완료|인증|후기|성공)|구입\s*(?:함|했|완료|인증)|결제\s*(?:했|완료)|주문\s*(?:했|완료)|먹었|질렀|지름|도착|수령|언박싱|개봉|뜯고|오우너|자랑', re.I)
 AVAILABLE_NOW = re.compile(r'재고\s*(?:가\s*)?(?:있|남)|(?:아직|지금|현재|계속)\s*(?:도\s*)?(?:살\s*수|구매\s*(?:가능|됨|된다)|결제\s*(?:가능|됨|된다)|주문\s*(?:가능|됨|된다)|판매\s*중|남아|남았|열려|풀려)|(?:구매|주문|결제)\s*가능|판매\s*중', re.I)
 CANCEL_OFFER = re.compile(r'취소\s*(?:할\s*(?:거|게|예정)|예정|합니다)|\d{1,2}[:시]\s*\d{0,2}.{0,12}취소', re.I)
 OFFER_NOTICE = re.compile(r'재입고|재판매|입고|풀렸|풀림|풀린|방금\s*뜬|취소분\s*(?:있|떴|풀)|응모|추첨|접수|예약\s*판매|판매|특가|핫딜|선착순|오픈|살놈|사라|주워가', re.I)
 OFFER_QUESTION = re.compile(r'어디서|어떻게|언제\s*(?:풀|입고|판매)|링크\s*(?:좀|주실|있나)|재고\s*(?:가\s*)?있(?:나|을까)|구매\s*가능(?:한가|한지|해\?)|응모함\?', re.I)
+ADVICE_QUESTION = re.compile(r'혜자(?:에|예|인)|가격.*(?:괜찮|적절)|(?:디스크|버전).*(?:아닌거|인거|없는거)|(?:뭐|어떤).*(?:나을|좋음|좋을)|(?:하나|두개|2개).*준다는', re.I)
+RECEIPT_IMAGE = re.compile(r'상품\s*준비\s*중|주문\s*(?:상세|취소|번호)|배송\s*조회|결제\s*완료', re.I)
 SPECULATION = re.compile(r'풀거\s*같|풀릴\s*듯|입고.*(?:같|예상)|밤\s*새야|풀렸으면', re.I)
 
 
@@ -209,7 +211,7 @@ def offer_basis(title, body, destination=None, image_text=''):
         return 'announced cancellation opportunity'
     if PURCHASE_STORY.search(text):
         return None
-    if OFFER_QUESTION.search(text) or SPECULATION.search(text):
+    if OFFER_QUESTION.search(text) or ADVICE_QUESTION.search(text) or SPECULATION.search(text):
         return None
     if re.search(r'어제|지난|예전에|아까', text) and not REOPENED.search(text):
         return None
@@ -217,7 +219,7 @@ def offer_basis(title, body, destination=None, image_text=''):
         return 'sale/restock/entry announcement'
     if destination:
         return 'shared purchase/entry link'
-    if re.search(r'구매하기|바로구매|장바구니|재입고', image_text):
+    if not RECEIPT_IMAGE.search(image_text) and re.search(r'구매하기|바로구매|장바구니|재입고', image_text):
         return 'shopping-page image; checkout unverified'
     return None
 
@@ -384,7 +386,12 @@ def inspect(title, url, description="", fetcher=None, now=None, ocr=None):
         raise ReviewUnavailable('Recognizable post body unavailable')
     page=Article();page.feed(main)
     text=' '.join(page.text)
-    if not text.strip() and not page.images and not page.links:raise ReviewUnavailable('Empty post')
+    if not text.strip() and not page.images and not page.links:
+        if PURCHASE_STORY.search(title) or OFFER_QUESTION.search(title) or ADVICE_QUESTION.search(title):
+            print('REVIEW '+json.dumps({'title':title,'url':url,'body_read':True,
+                  'decision':'reject','basis':'empty purchase story or advice question'},ensure_ascii=False),flush=True)
+            return None
+        raise ReviewUnavailable('Empty post')
     linked='';image_text='';statuses=[]
     links=page.links+[(u,'링크') for u in re.findall(r'https?://[^\s<>"\']+',text)]
     destination=choose_link(url,links)

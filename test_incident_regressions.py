@@ -18,13 +18,13 @@ class IncidentTests(unittest.TestCase):
         rows=json.loads(Path(__file__).with_name('observed_community_posts.json').read_text(encoding='utf-8'))
         # 728347's text is only image hashes; validate the real image with OCR
         # in validate_context_live.py instead of pretending hashes identify it.
-        positive={'728239','728242','728245','728250','728255','728256','728336','728073'}
+        positive={'728239','728242','728245','728256','728336','728073'}
         for row in rows:
             if row['id'] in positive:
                 with self.subTest(row['id']):
                     self.assertIsNotNone(s.review(row['title'],row['url'],
                         '<div class="write_div">'+row['body']+'</div>',now=NOW))
-            if row['id'] in {'728246','728265','728278','728331','728332','728334','728339','728347','728367'}:
+            if row['id'] in {'728246','728250','728255','728265','728278','728331','728332','728334','728339','728347','728367'}:
                 with self.subTest(rejected_personal_post=row['id']):
                     self.assertIsNone(s.review(row['title'],row['url'],
                         '<div class="write_div">'+row['body']+'</div>',now=NOW,

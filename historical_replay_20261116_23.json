@@ -1,0 +1,490 @@
+{
+  "window_kst": [
+    "2026-11-16T23:00:00+09:00",
+    "2026-11-17T00:00:00+09:00"
+  ],
+  "discovery_pages": [
+    5,
+    6
+  ],
+  "notes": "All 53 posts still visible in the public list were read on 2026-11-17. This is a replay of statements at their publication times, not retrospective proof of checkout inventory or an archive of deleted/edited content. Four relevant attached images were also visually inspected. Ambiguous controller-bundle exhortation 728258 is explicitly recorded, not counted as confirmed PS5 Pro stock.",
+  "posts": [
+    {
+      "id": "728230",
+      "title": "난 플스 msi모니터 이거 물려서 사용중인데",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728230",
+      "published": "2026-11-16T23:00:12+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728231",
+      "title": "레데리3 개발전에 불리2 가볍게 내주고 시작해줘라",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728231",
+      "published": "2026-11-16T23:02:09+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728232",
+      "title": "니.gta 시리즈 첨인데 질문좀",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728232",
+      "published": "2026-11-16T23:02:36+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728233",
+      "title": "프로랑 노말이랑 차이 별로 없다고",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728233",
+      "published": "2026-11-16T23:04:52+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728234",
+      "title": "2일만 기절시켜주라",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728234",
+      "published": "2026-11-16T23:06:33+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728236",
+      "title": "죄송한데 gta때매 플스프로 사려는데 디스크로 사야해여? 아니면 없는거로사여?",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728236",
+      "published": "2026-11-16T23:07:37+09:00",
+      "expected": "reject",
+      "review_category": "advice_question",
+      "review_note": "advice_question"
+    },
+    {
+      "id": "728237",
+      "title": "이 가격 괜찮은거임?",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728237",
+      "published": "2026-11-16T23:07:57+09:00",
+      "expected": "reject",
+      "review_category": "advice_question",
+      "review_note": "advice_question"
+    },
+    {
+      "id": "728238",
+      "title": "그타6는 발매 당일날 손익 찍고 시작하겐네",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728238",
+      "published": "2026-11-16T23:11:09+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728239",
+      "title": "야 쿠팡에 플스5 프로 정가 풀림 빨리 살놈들 사라",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728239",
+      "published": "2026-11-16T23:12:34+09:00",
+      "expected": "lead",
+      "review_category": "restock_report",
+      "review_note": "explicit current restock at Coupang with console-bundle price"
+    },
+    {
+      "id": "728240",
+      "title": "고오쓰 진짜 미치겠네",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728240",
+      "published": "2026-11-16T23:12:36+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728241",
+      "title": "그타6 빼고 다 지움",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728241",
+      "published": "2026-11-16T23:12:40+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728242",
+      "title": "프로 풀렸다",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728242",
+      "published": "2026-11-16T23:12:42+09:00",
+      "expected": "lead",
+      "review_category": "restock_report",
+      "review_note": "restock title plus actual console-and-two-controller product screenshot"
+    },
+    {
+      "id": "728243",
+      "title": "넷플 계정공유 해봉사람 잇나",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728243",
+      "published": "2026-11-16T23:13:40+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728245",
+      "title": "쿠팡에 프로 풀렸다는데?",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728245",
+      "published": "2026-11-16T23:13:55+09:00",
+      "expected": "lead",
+      "review_category": "restock_report",
+      "review_note": "current restock relay; console bundle named"
+    },
+    {
+      "id": "728246",
+      "title": "쿠팡 프로 구매함",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728246",
+      "published": "2026-11-16T23:14:07+09:00",
+      "expected": "reject",
+      "review_category": "purchase_story",
+      "review_note": "purchase_story"
+    },
+    {
+      "id": "728247",
+      "title": "되팔이들 꼬시다",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728247",
+      "published": "2026-11-16T23:14:52+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728248",
+      "title": "ㅇㅇ 형 존나고맙다 시발",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728248",
+      "published": "2026-11-16T23:15:04+09:00",
+      "expected": "reject",
+      "review_category": "purchase_story",
+      "review_note": "purchase_story"
+    },
+    {
+      "id": "728250",
+      "title": "잘몰라서그런데 쿠팡에 방금 풀린게 역대급혜자에여?ㅜ",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728250",
+      "published": "2026-11-16T23:16:27+09:00",
+      "expected": "reject",
+      "review_category": "advice_question",
+      "review_note": "advice_question"
+    },
+    {
+      "id": "728251",
+      "title": "되팔이들 ㅋㅋㅋ 컽 ㅋㅋㅋ",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728251",
+      "published": "2026-11-16T23:17:00+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728252",
+      "title": "ㅇㅇ게이야 존나 고맙다",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728252",
+      "published": "2026-11-16T23:17:59+09:00",
+      "expected": "reject",
+      "review_category": "purchase_story",
+      "review_note": "purchase_story"
+    },
+    {
+      "id": "728253",
+      "title": "듀센 하나 더 준다는거임?",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728253",
+      "published": "2026-11-16T23:18:08+09:00",
+      "expected": "reject",
+      "review_category": "advice_question",
+      "review_note": "advice_question"
+    },
+    {
+      "id": "728254",
+      "title": "?????????",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728254",
+      "published": "2026-11-16T23:18:23+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728255",
+      "title": "쿠팡 방금 풀린게 디스크버전 아닌거죠?",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728255",
+      "published": "2026-11-16T23:18:41+09:00",
+      "expected": "reject",
+      "review_category": "advice_question",
+      "review_note": "advice_question"
+    },
+    {
+      "id": "728256",
+      "title": "신규 물량 입고 됐나보네",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728256",
+      "published": "2026-11-16T23:19:13+09:00",
+      "expected": "lead",
+      "review_category": "restock_report",
+      "review_note": "ongoing supply observation on the PS5 board; model remains uncertain"
+    },
+    {
+      "id": "728257",
+      "title": "품절",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728257",
+      "published": "2026-11-16T23:19:50+09:00",
+      "expected": "reject",
+      "review_category": "ended_sale",
+      "review_note": "ended_sale"
+    },
+    {
+      "id": "728258",
+      "title": "듀센 인질이고 뭐고 없는 새끼들은 빨리 사라 마지막 기회다 ㄹㅇ",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728258",
+      "published": "2026-11-16T23:19:53+09:00",
+      "expected": "reject",
+      "review_category": "unconfirmed_product",
+      "review_note": "Purchase exhortation mentions controllers/bundle only, without PS5 Pro, a seller link, or a product photo; do not claim verified console stock. Conflicts with sold-out post 3 seconds earlier."
+    },
+    {
+      "id": "728259",
+      "title": "쿠팡 다팔렸다 ㅋㅋㅋㅋㅋ",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728259",
+      "published": "2026-11-16T23:20:30+09:00",
+      "expected": "reject",
+      "review_category": "ended_sale",
+      "review_note": "ended_sale"
+    },
+    {
+      "id": "728260",
+      "title": "집에 듀센 1개 있는데 이거오면 듀센 3개 되는데 1개 팔아야겠다",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728260",
+      "published": "2026-11-16T23:20:37+09:00",
+      "expected": "reject",
+      "review_category": "purchase_story",
+      "review_note": "purchase_story"
+    },
+    {
+      "id": "728261",
+      "title": "겜창은 듀센 2개 필수라 딱히 인질도 아니네 ㅋㅋㅋㅋㅋㅋ",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728261",
+      "published": "2026-11-16T23:21:26+09:00",
+      "expected": "reject",
+      "review_category": "ended_sale",
+      "review_note": "ended_sale"
+    },
+    {
+      "id": "728262",
+      "title": "쥰나 급해서 일시불 갈겼네",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728262",
+      "published": "2026-11-16T23:21:55+09:00",
+      "expected": "reject",
+      "review_category": "purchase_story",
+      "review_note": "purchase_story"
+    },
+    {
+      "id": "728263",
+      "title": "쿠팡글 처음 올라오고 13분 버텼네",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728263",
+      "published": "2026-11-16T23:22:02+09:00",
+      "expected": "reject",
+      "review_category": "ended_sale",
+      "review_note": "ended_sale"
+    },
+    {
+      "id": "728264",
+      "title": "근데쿠팡배송 조심해라",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728264",
+      "published": "2026-11-16T23:23:18+09:00",
+      "expected": "reject",
+      "review_category": "purchase_story",
+      "review_note": "purchase_story"
+    },
+    {
+      "id": "728265",
+      "title": "쿠팡 운좋게 방금 구매했는데..원룸인데 누가 훔쳐가진않겟지 문앞배송 ㅠㅠ",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728265",
+      "published": "2026-11-16T23:24:19+09:00",
+      "expected": "reject",
+      "review_category": "purchase_story",
+      "review_note": "purchase_story"
+    },
+    {
+      "id": "728266",
+      "title": "몇달간 기회 진짜 ㅈㄴ 많았음",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728266",
+      "published": "2026-11-16T23:24:38+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728267",
+      "title": "하 ... 운도없다",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728267",
+      "published": "2026-11-16T23:29:06+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728268",
+      "title": "인질이니 오래 버티긴 했네",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728268",
+      "published": "2026-11-16T23:29:23+09:00",
+      "expected": "reject",
+      "review_category": "ended_sale",
+      "review_note": "ended_sale"
+    },
+    {
+      "id": "728269",
+      "title": "형들은 gta6 패키지 어디서 구매함?",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728269",
+      "published": "2026-11-16T23:31:17+09:00",
+      "expected": "reject",
+      "review_category": "advice_question",
+      "review_note": "advice_question"
+    },
+    {
+      "id": "728270",
+      "title": "난 프로가 이렇게까지 될 줄 몰랐음...",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728270",
+      "published": "2026-11-16T23:31:49+09:00",
+      "expected": "reject",
+      "review_category": "purchase_story",
+      "review_note": "purchase_story"
+    },
+    {
+      "id": "728271",
+      "title": "진짜 어제 못참고 190에 샀으면",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728271",
+      "published": "2026-11-16T23:31:54+09:00",
+      "expected": "reject",
+      "review_category": "purchase_story",
+      "review_note": "purchase_story"
+    },
+    {
+      "id": "728272",
+      "title": "근데 gta6가 노잼이거나 망작일 확률은 없다고봐야죠?",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728272",
+      "published": "2026-11-16T23:32:03+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728273",
+      "title": "고오쓰 레전드 이건 뭐가 다른거?",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728273",
+      "published": "2026-11-16T23:33:02+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728274",
+      "title": "인질셋 에펨에 올라왔었네.. 15분에",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728274",
+      "published": "2026-11-16T23:34:11+09:00",
+      "expected": "reject",
+      "review_category": "ended_sale",
+      "review_note": "ended_sale"
+    },
+    {
+      "id": "728275",
+      "title": "아스트로봇 왜케 재밌음?",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728275",
+      "published": "2026-11-16T23:35:21+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728276",
+      "title": "아스트로봇 r스틱 반전가능?",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728276",
+      "published": "2026-11-16T23:36:07+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728277",
+      "title": "이번에 프로 산 사람들 신규? 노말에서갈아타기?",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728277",
+      "published": "2026-11-16T23:38:05+09:00",
+      "expected": "reject",
+      "review_category": "purchase_story",
+      "review_note": "purchase_story"
+    },
+    {
+      "id": "728278",
+      "title": "프로 샀다 !",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728278",
+      "published": "2026-11-16T23:38:12+09:00",
+      "expected": "reject",
+      "review_category": "purchase_story",
+      "review_note": "purchase_story"
+    },
+    {
+      "id": "728279",
+      "title": "쓰시마 요테이 둘다 플래트로피 땀",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728279",
+      "published": "2026-11-16T23:46:23+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728280",
+      "title": "수요일에 문제 없이 잘 도착했으면 좋겠다",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728280",
+      "published": "2026-11-16T23:46:24+09:00",
+      "expected": "reject",
+      "review_category": "purchase_story",
+      "review_note": "purchase_story"
+    },
+    {
+      "id": "728281",
+      "title": "플스해야되는데 아빠 술먹어서 못하고잇름",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728281",
+      "published": "2026-11-16T23:50:18+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728282",
+      "title": "라그나로크 스킬 설명 제대로 안보고 했는데",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728282",
+      "published": "2026-11-16T23:53:36+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728283",
+      "title": "웬지 가격 오르고 물량이 더 풀리는거같은데 설마...",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728283",
+      "published": "2026-11-16T23:54:21+09:00",
+      "expected": "reject",
+      "review_category": "speculation",
+      "review_note": "speculation"
+    },
+    {
+      "id": "728284",
+      "title": "택배훔쳐가도 조금만한거 훔쳐가지 대놓고 큰걸",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728284",
+      "published": "2026-11-16T23:54:29+09:00",
+      "expected": "reject",
+      "review_category": "unrelated",
+      "review_note": "unrelated"
+    },
+    {
+      "id": "728285",
+      "title": "결국 사버렸다......",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728285",
+      "published": "2026-11-16T23:59:02+09:00",
+      "expected": "reject",
+      "review_category": "purchase_story",
+      "review_note": "purchase_story"
+    }
+  ]
+}
