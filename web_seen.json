@@ -40,13 +40,13 @@
     "4f57338062037bda7f381380"
   ],
   "last_scan": {
-    "at": "2026-11-18T07:33:43.297343+09:00",
-    "sources_ok": 3,
-    "sources_failed": 6,
-    "results": 7,
+    "at": "2026-11-18T07:38:42.990895+09:00",
+    "sources_ok": 1,
+    "sources_failed": 8,
+    "results": 6,
     "alerts": 0,
     "deferred": 0,
-    "pending_body": 7,
+    "pending_body": 6,
     "failed_alerts": 0
   }
 }
