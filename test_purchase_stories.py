@@ -11,6 +11,9 @@ PHOTO = '<img src="https://example.com/receipt.jpg">'
 class PurchaseStories(unittest.TestCase):
     def test_personal_purchase_is_rejected_even_with_console_receipt_and_link(self):
         for title, body in [
+            # Actual erroneous alert message_id=30, 2026-11-17 14:56 KST.
+            # Title recovered from runner log; body is now unavailable.
+            ('난 노말유저인데 올해 설날 세일때 크림에서 프로 샀다가', ''),
             ('프로 샀다', '드디어 구매 완료'),
             ('쿠팡 프로 구매함', '이걸 살려주네'),
             ('취소분 샀다', '적립 못해서 아쉽다'),
