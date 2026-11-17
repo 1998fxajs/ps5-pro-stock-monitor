@@ -50,11 +50,11 @@ class ContextTests(unittest.TestCase):
         self.assertIsNone(s.inspect('링크',POST,fetcher=fetch,now=NOW))
         self.assertEqual(len(visited),2)
 
-    def test_image_subject_controls_ambiguous_purchase(self):
+    def test_purchase_photo_is_not_a_remaining_buying_opportunity(self):
         html='<div class="write_div"><img src="https://dcimg8.dcinside.co.kr/example.jpg"></div>'
         yes=s.inspect('나도 이제야 샀다',POST,fetcher=lambda _:html,ocr=lambda *_:('PlayStation5 Pro 콘솔 2TB 1,399,000원','OCR read'),now=NOW)
         no=s.inspect('나도 이제야 샀다',POST,fetcher=lambda _:html,ocr=lambda *_:('어쌔신 크리드 섀도우스 39800원','OCR read'),now=NOW)
-        self.assertIsNotNone(yes);self.assertIsNone(no)
+        self.assertIsNone(yes);self.assertIsNone(no)
 
     def test_price_and_bundle_are_not_exclusion_gates(self):
         for title in ['PS5 Pro + 듀얼센스 1,399,000원','플스5 프로 번들 재입고','PS5 Pro 본체 + 디스크 드라이브 판매','PS5 Pro 콘솔 액세서리 포함 세트 판매']:

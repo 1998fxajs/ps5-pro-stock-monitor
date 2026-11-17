@@ -185,6 +185,51 @@ HARDWARE = re.compile(r'본체|콘솔|2\s*TB|CFI[-\s]*7122B',re.I)
 RESTOCK = re.compile(r'풀렸|풀림|풀린|떴|떳|뜬|입고|취소분|취소\s*할|물량|응모|추첨',re.I)
 OWNER = re.compile(r'^(?:\s*(?:오우너|소유|보유|쓰고|사용|가지고|지원)|(?:에서|으로|로)\s*(?:플레이|돌리|게임))',re.I)
 COMPATIBILITY = re.compile(r'(?:PS\s*5\s*Pro|플스\s*5?\s*프로|프로)\s*(?:용|호환|전용|에서|지원)',re.I)
+PURCHASE_STORY = re.compile(r'샀|사서|구매\s*(?:함|했|완료|인증|후기|성공)|구입\s*(?:함|했|완료|인증)|결제\s*(?:했|완료)|주문\s*(?:했|완료)|먹었|질렀|지름|도착|수령|언박싱|개봉|뜯고|오우너|자랑', re.I)
+AVAILABLE_NOW = re.compile(r'재고\s*(?:가\s*)?(?:있|남)|(?:아직|지금|현재|계속)\s*(?:도\s*)?(?:살\s*수|구매\s*(?:가능|됨|된다)|결제\s*(?:가능|됨|된다)|주문\s*(?:가능|됨|된다)|판매\s*중|남아|남았|열려|풀려)|(?:구매|주문|결제)\s*가능|판매\s*중', re.I)
+CANCEL_OFFER = re.compile(r'취소\s*(?:할\s*(?:거|게|예정)|예정|합니다)|\d{1,2}[:시]\s*\d{0,2}.{0,12}취소', re.I)
+OFFER_NOTICE = re.compile(r'재입고|재판매|입고|풀렸|풀림|풀린|방금\s*뜬|취소분\s*(?:있|떴|풀)|응모|추첨|접수|예약\s*판매|판매|특가|핫딜|선착순|오픈|살놈|사라|주워가', re.I)
+OFFER_QUESTION = re.compile(r'어디서|어떻게|언제\s*(?:풀|입고|판매)|링크\s*(?:좀|주실|있나)|재고\s*(?:가\s*)?있(?:나|을까)|구매\s*가능(?:한가|한지|해\?)|응모함\?', re.I)
+SPECULATION = re.compile(r'풀거\s*같|풀릴\s*듯|입고.*(?:같|예상)|밤\s*새야|풀렸으면', re.I)
+
+
+def offer_basis(title, body, destination=None, image_text=''):
+    """A purchase receipt identifies ownership, not a remaining buying opportunity."""
+    text = title+' '+body
+    # Inspect individual statements so a question or negative stock statement
+    # cannot turn a personal purchase into an available offer.
+    statements = re.split(r'[\n.!?。]+', text)
+    available = any(AVAILABLE_NOW.search(part) and not NEGATIVE.search(part)
+                    and not CLOSED_TITLE.search(part) and not OFFER_QUESTION.search(part)
+                    and not re.search(r'있다고|있다길래|가능하다고|가능하다길래|(?:어제|그때|당시|예전에).*?(?:재고|가능)', part)
+                    for part in statements)
+    if available:
+        return 'explicit current availability in post'
+    if CANCEL_OFFER.search(text):
+        return 'announced cancellation opportunity'
+    if PURCHASE_STORY.search(text):
+        return None
+    if OFFER_QUESTION.search(text) or SPECULATION.search(text):
+        return None
+    if re.search(r'어제|지난|예전에|아까', text) and not REOPENED.search(text):
+        return None
+    if OFFER_NOTICE.search(text):
+        return 'sale/restock/entry announcement'
+    if destination:
+        return 'shared purchase/entry link'
+    if re.search(r'구매하기|바로구매|장바구니|재입고', image_text):
+        return 'shopping-page image; checkout unverified'
+    return None
+
+
+def is_retail_product_page(url):
+    parsed = urllib.parse.urlparse(url)
+    host = parsed.hostname or ''
+    retailers = ('playshop.co.kr', 'ojinplaystation.cafe24.com', 'get-these.com',
+                 'gamewoori.com', 'ssg.com', 'compuzone.co.kr', 'gmarket.co.kr',
+                 'naver.com', 'coupang.com', '11st.co.kr', 'lotteon.com', 'e-himart.co.kr')
+    return (any(host == h or host.endswith('.'+h) for h in retailers)
+            and bool(re.search(r'/products?/|/vp/products/|itemview|itemdtl|product_no=|productno=|goodscode=',url,re.I)))
 
 class ReviewUnavailable(RuntimeError):
     """Body could not be read; keep it pending instead of marking it reviewed."""
@@ -237,7 +282,8 @@ def review(title, article_url, html="", description="", now=None, image_text="",
     if re.search(r'본체\s*(?:는\s*)?(?:미포함|불포함|별도|없음)|(?:패드|컨트롤러|듀얼센스|디스크\s*드라이브|게임\s*타이틀)만\s*(?:판매|팝|포함)',article_text,re.I):
         return None
     # Read the body BEFORE deciding. In a PS gallery, '프로', store-only,
-    # '취소분 샀다', or a bare product link can be an actionable lead.
+    # a bare product link can be an actionable lead. A personal purchase alone
+    # is not an offer, even if its receipt identifies a PS5 Pro console.
     links = list(source.links)
     other = Article()
     other.feed(description or '')
@@ -252,13 +298,15 @@ def review(title, article_url, html="", description="", now=None, image_text="",
     linked_product=console_subject(linked_text,False)
     image_product=console_subject(image_text,False)
     product=title_product or body_product or linked_product or image_product
-    signal=purchase_signal(title+' '+article_text) or bool(destination) or bool(image_product and re.search(r'구매하기|바로구매|장바구니|재입고',image_text))
+    opportunity = ('direct retailer product page' if is_retail_product_page(article_url)
+                   else offer_basis(title, article_text, destination, image_text))
+    signal = bool(opportunity)
     # A board name, generic shopping link, or image presence is not console
     # evidence. An unnamed *restock* in the PS board is an uncertain lead;
-    # generic "bought it" requires the linked product or image to identify it.
+    # generic "bought it" is not an availability report.
     implied=scoped and not NON_CONSOLE.search(context) and bool(
         re.search(r'(?:쿠팡|네이버|플레이샵|겟디즈|겜우리|컴퓨존|SSG|쓱)(?:에|에서)?\s*(?:(?:방금|지금|또|다시)\s*)?(?:풀렸|풀림|풀린|떴)',title,re.I)
-        or re.search(r'^(?:신규\s*물량|물량\s*입고|취소분\s*샀)',title)
+        or re.search(r'^(?:신규\s*물량|물량\s*입고)',title)
         or (RETAILER.search(title) and purchase_signal(title) and re.search(r'플스인거|본체|콘솔',article_text)))
     if not ((product or implied) and signal):
         return None
@@ -307,7 +355,7 @@ def review(title, article_url, html="", description="", now=None, image_text="",
         "images": images[:3],
         "image_text": product_excerpt(image_text),
         "linked_subject": linked_text[:300],
-        "decision_basis": 'console subject' if product else 'unnamed restock report',
+        "decision_basis": opportunity + ('; console identified' if product else '; console unconfirmed'),
     }
 
 def fetch_public(url, referer=None, binary=False):
@@ -340,6 +388,13 @@ def inspect(title, url, description="", fetcher=None, now=None, ocr=None):
     linked='';image_text='';statuses=[]
     links=page.links+[(u,'링크') for u in re.findall(r'https?://[^\s<>"\']+',text)]
     destination=choose_link(url,links)
+    # The body has been read. An ownership story without an explicit current
+    # opportunity is a completed rejection, not an unread-image retry.
+    if (not is_retail_product_page(url) and PURCHASE_STORY.search(title+' '+text)
+            and not offer_basis(title,text,destination)):
+        print('REVIEW '+json.dumps({'title':title,'url':url,'body_read':True,
+              'decision':'reject','basis':'personal purchase without a current buying opportunity'},ensure_ascii=False),flush=True)
+        return None
     if destination:
         try:
             linked_html=(fetcher or fetch_public)(destination)

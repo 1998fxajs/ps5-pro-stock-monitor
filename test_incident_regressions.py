@@ -18,12 +18,17 @@ class IncidentTests(unittest.TestCase):
         rows=json.loads(Path(__file__).with_name('observed_community_posts.json').read_text(encoding='utf-8'))
         # 728347's text is only image hashes; validate the real image with OCR
         # in validate_context_live.py instead of pretending hashes identify it.
-        positive={'728239','728242','728245','728246','728250','728255','728256','728265','728331','728334','728336','728339','728073'}
+        positive={'728239','728242','728245','728250','728255','728256','728336','728073'}
         for row in rows:
             if row['id'] in positive:
                 with self.subTest(row['id']):
                     self.assertIsNotNone(s.review(row['title'],row['url'],
                         '<div class="write_div">'+row['body']+'</div>',now=NOW))
+            if row['id'] in {'728246','728265','728278','728331','728332','728334','728339','728347','728367'}:
+                with self.subTest(rejected_personal_post=row['id']):
+                    self.assertIsNone(s.review(row['title'],row['url'],
+                        '<div class="write_div">'+row['body']+'</div>',now=NOW,
+                        image_text='PlayStation5 Pro 콘솔 2TB 구매 완료'))
 
     def test_title_omits_every_product_word_but_body_supplies_it(self):
         lead=s.review('링크',POST,'<div class="write_div">프로 풀렸다 <a href="https://www.coupang.com/vp/products/123">링크</a></div>',now=NOW)
