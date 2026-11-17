@@ -7,11 +7,13 @@ import base64
 import concurrent.futures
 import hashlib
 import json
+import re
 from pathlib import Path
 import urllib.parse
 import xml.etree.ElementTree as ET
 from urllib.error import HTTPError
-from datetime import datetime
+from datetime import datetime, timedelta
+import email.utils
 import monitor_window
 import sale_link_review as review
 from promo_watch import github, request, telegram
@@ -23,9 +25,14 @@ def read_source(source):
     raw = request(source['url'])
     if source['type'] == 'rss':
         root = ET.fromstring(raw)
-        return [{'title':i.findtext('title',''), 'link':i.findtext('link',''),
-                 'description':i.findtext('description',''), 'source':source['label']}
+        rows = [{'title':i.findtext('title',''), 'link':i.findtext('link',''),
+                 'description':i.findtext('description',''), 'source':source['label'],
+                 'published':i.findtext('pubDate','')}
                 for i in root.findall('.//channel/item') if i.findtext('link','')]
+        # A successful RSS response can still be unrelated search results.
+        if rows and not any(review.PLATFORM.search(r['title']+' '+r['description']) for r in rows):
+            raise RuntimeError('Search returned unrelated results; coverage unavailable')
+        return rows
     page = review.Article()
     page.feed(raw.decode('utf-8',errors='replace'))
     items = {}
@@ -37,10 +44,31 @@ def read_source(source):
             continue
         if not review.PLATFORM.search(label+' '+urllib.parse.unquote(p.path)):
             continue
-        items[url] = {'title':label.strip(),'link':url,'description':'','source':source['label']}
+        items[url] = {'title':re.sub(r'\s+',' ',label).strip(),'link':url,'description':'','source':source['label']}
     if not items:
         raise RuntimeError('No recognizable deal result links')
     return list(items.values())
+
+def publication_time(row,lead=None,now=None):
+    now=now or datetime.now(review.KST)
+    for value in (row.get('published'),(lead or {}).get('published_hint')):
+        if not value:continue
+        try:stamp=datetime.fromisoformat(value.replace('Z','+00:00'))
+        except ValueError:
+            try:stamp=email.utils.parsedate_to_datetime(value)
+            except (ValueError,TypeError):continue
+        return stamp.replace(tzinfo=review.KST) if stamp.tzinfo is None else stamp
+    # The deal list's own relative publication label, not search crawl time.
+    if urllib.parse.urlparse(row['link']).hostname=='hotdeal.zip':
+        match=re.search(r'(\d+)\s*(분|시간|일)\s*전',row['title'])
+        if match:
+            amount=int(match[1]);unit={'분':60,'시간':3600,'일':86400}[match[2]]
+            return now-timedelta(seconds=amount*unit)
+    return None
+
+def is_recent(row,lead=None,now=None):
+    now=now or datetime.now(review.KST);published=publication_time(row,lead,now)
+    return bool(published and timedelta(minutes=-5)<=now-published<=timedelta(hours=3))
 
 def load():
     try:
@@ -84,8 +112,10 @@ def main():
             key,row=tasks[task]
             try:
                 lead=task.result()
-                if lead:
-                    telegram(review.format_alert(lead,row['source'],None));sent+=1
+                if lead and is_recent(row,lead):
+                    telegram(review.format_alert(lead,row['source'],publication_time(row,lead)));sent+=1
+                elif lead:
+                    print('WEB withheld old/undated result: '+row['link'])
                 processed.append(key)
             except Exception as exc:
                 failed_alerts.append(key)

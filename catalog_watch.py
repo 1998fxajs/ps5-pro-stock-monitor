@@ -17,6 +17,7 @@ from html.parser import HTMLParser
 from urllib.error import HTTPError
 
 import monitor_window
+import sale_link_review
 from promo_watch import INCLUDE, EXCLUDE, telegram
 
 STATE_PATH = "catalog_seen.json"
@@ -101,11 +102,7 @@ class Links(HTMLParser):
 
 def acceptable_title(name):
     name = re.sub(r"\s+", " ", unescape(name)).strip()
-    if not INCLUDE.search(name) or EXCLUDE.search(name):
-        return False
-    if re.search(r"(?:디스크\s*드라이브\s*\+|듀얼센스\s*\+|번들|묶음|세트|중고|리퍼|직구)", name, re.I):
-        return False
-    return True
+    return sale_link_review.console_subject(name, False) and not re.search(r'중고|리퍼|직구|해외배송',name)
 
 def allow_url(url, source):
     parsed = urllib.parse.urlparse(url)
@@ -134,10 +131,7 @@ def discover(source, html):
         # Cafe24 themes sometimes keep product names outside the <a> tag,
         # but still put the full product name into the link's slug.
         slug = urllib.parse.unquote(urllib.parse.urlparse(url).path)
-        slug_ok = (source["type"] == "cafe24"
-                   and re.search(r"ps5[-_\s]*pro|playstation[-_\s]*5[-_\s]*pro|플레이스테이션[-_\s]*5[-_\s]*프로", slug, re.I)
-                   and not EXCLUDE.search(slug)
-                   and not re.search(r"듀얼센스|디스크드라이브|번들|세트|중고|리퍼", slug, re.I))
+        slug_ok = source['type']=='cafe24' and acceptable_title(re.sub(r'[-_]',' ',slug))
         if acceptable_title(title) or slug_ok:
             label = re.sub(r"\s+", " ", unescape(title)).strip()[:140]
             if not acceptable_title(label):
@@ -178,6 +172,7 @@ def load():
         raise
 
 def save(state, sha):
+    if os.environ.get('MONITOR_DRY_RUN') == '1':return
     data = {"message": "chore: record new product URLs",
             "content": base64.b64encode((json.dumps(state, ensure_ascii=False, indent=2) + "\n").encode()).decode()}
     if sha:
@@ -251,9 +246,14 @@ def main():
                 print(f"Baseline captured for {src['name']}; no retrospective alerts")
                 continue
             fresh = sorted(set(matches) - set(old))
+            reviewed=[]
             for url in fresh:
-                alerts.append((src["name"], matches[url], url))
-            updated = sorted(set(old) | set(matches))[-400:]
+                try:lead=sale_link_review.inspect(matches[url],url)
+                except sale_link_review.ReviewUnavailable:
+                    print('CATALOG pending product body: '+url);continue
+                if lead:alerts.append((src['name'],matches[url],url))
+                reviewed.append(url)
+            updated = sorted(set(old) | set(reviewed))[-400:]
             if updated != old:
                 state[src["id"]] = updated
                 changed = True

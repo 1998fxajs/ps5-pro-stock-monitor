@@ -100,6 +100,7 @@ def load_state():
         raise
 
 def save_state(state, sha):
+    if os.environ.get('MONITOR_DRY_RUN') == '1':return
     data = {"message": "chore: update promo lead deduplication",
             "content": base64.b64encode((json.dumps(state, ensure_ascii=False) + "\n").encode()).decode()}
     if sha:
@@ -194,8 +195,12 @@ def main():
     for key, item in sorted(items.items(), key=lambda kv: kv[1]["published"], reverse=True)[:24]:
         # Review source body and candidate product/raffle URLs; don't present
         # a Google News wrapper as the purchase link when a direct link exists.
-        lead = sale_link_review.inspect(
-            item["title"], item["link"], item.get("description", ""))
+        try:
+            lead = sale_link_review.inspect(
+                item["title"], item["link"], item.get("description", ""))
+        except sale_link_review.ReviewUnavailable as exc:
+            print('PROMO pending body review: '+item['link']+' '+str(exc))
+            continue
         if lead is not None:
             try:
                 telegram(sale_link_review.format_alert(lead, item['source'], item['published']))

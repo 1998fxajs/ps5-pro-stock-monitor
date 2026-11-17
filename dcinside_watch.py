@@ -87,6 +87,7 @@ def load_state():
         raise
 
 def save_state(data, sha):
+    if __import__('os').environ.get('MONITOR_DRY_RUN') == '1':return sha
     payload = {
         "message": "chore: record DC Inside forum posts",
         "content": base64.b64encode((json.dumps(data, ensure_ascii=False, indent=2) + "\n").encode()).decode(),

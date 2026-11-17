@@ -16,7 +16,9 @@ POST='https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=1'
 class IncidentTests(unittest.TestCase):
     def test_real_posts_reach_lead_stage(self):
         rows=json.loads(Path(__file__).with_name('observed_community_posts.json').read_text(encoding='utf-8'))
-        positive={'728239','728242','728245','728246','728250','728255','728256','728265','728331','728334','728336','728339','728347','728073'}
+        # 728347's text is only image hashes; validate the real image with OCR
+        # in validate_context_live.py instead of pretending hashes identify it.
+        positive={'728239','728242','728245','728246','728250','728255','728256','728265','728331','728334','728336','728339','728073'}
         for row in rows:
             if row['id'] in positive:
                 with self.subTest(row['id']):
@@ -28,9 +30,11 @@ class IncidentTests(unittest.TestCase):
         self.assertEqual(lead['link'],'https://www.coupang.com/vp/products/123')
 
     def test_link_only_body_in_ps_gallery(self):
-        lead=s.review('이거',POST,'<div class="write_div">https://www.coupang.com/vp/products/123</div>',now=NOW)
+        def fetch(url):
+            return '<div class="write_div">https://www.coupang.com/vp/products/123</div>' if url==POST else '<article><h1>PlayStation 5 Pro 콘솔 2TB</h1>구매</article>'
+        lead=s.inspect('이거',POST,fetcher=fetch,now=NOW)
         self.assertTrue(lead['direct_link'])
-        self.assertTrue(lead['warnings'])
+        self.assertTrue(lead['product_confirmed'])
 
     def test_image_only_post_is_not_silently_discarded(self):
         lead=s.review('프로 풀렸다',POST,'<div class="write_div"><img src="https://dcimg8.dcinside.co.kr/viewimage.php?id=1"></div>',now=NOW)

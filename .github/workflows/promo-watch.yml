@@ -9,6 +9,10 @@ on:
     paths:
       - promo_watch.py
       - sale_link_review.py
+      - post_content.py
+      - image_ocr.py
+      - test_context_review.py
+      - validate_context_live.py
       - test_sale_link_review.py
       - catalog_watch.py
       - dcinside_watch.py
@@ -49,11 +53,24 @@ jobs:
       - name: Verify announcement, listing, DC, and loop parsers
         if: steps.window.outputs.active == 'true'
         run: python3 -m unittest discover -v
+      - name: Install free Korean and English image OCR
+        if: steps.window.outputs.active == 'true'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-kor
+      - name: Read current posts and replay historical images without sending
+        if: steps.window.outputs.active == 'true' && env.MONITOR_DRY_RUN == '1'
+        run: python3 -u validate_context_live.py
       - name: Poll new sale posts and product listings every five minutes
         if: steps.window.outputs.active == 'true'
         run: python3 -u watch_loop.py promo --duration-minutes "$DURATION_MINUTES"
         env:
-          DURATION_MINUTES: '140'
+          DURATION_MINUTES: '0.1'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - name: Retain context validation evidence
+        if: always() && env.MONITOR_DRY_RUN == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: context-validation
+          path: context-validation.json
+          if-no-files-found: warn

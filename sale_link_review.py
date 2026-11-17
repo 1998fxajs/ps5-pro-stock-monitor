@@ -14,6 +14,8 @@ from html.parser import HTMLParser
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import monitor_window
+import post_content
+import image_ocr
 
 KST = ZoneInfo("Asia/Seoul")
 PRODUCT = re.compile(r"(?:\bps\s*5\s*pro\b|play\s*station\s*5\s*pro|ps\s*5\s*프로|플레이\s*스테이션\s*5?\s*프로|플스\s*5?\s*프로|CFI[-\s]*7122B)", re.I)
@@ -102,11 +104,7 @@ def is_ps_board(url):
     return u.hostname == 'gall.dcinside.com' and urllib.parse.parse_qs(u.query).get('id', [''])[0] in ('ps5', 'playstation')
 
 def article_content(html, url):
-    if urllib.parse.urlparse(url).hostname == 'gall.dcinside.com' and 'write_div' in html:
-        body = PostBody()
-        body.feed(html)
-        return ''.join(body.parts)
-    return html
+    return post_content.extract(html, url)[0]
 
 def plain(html):
     return re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", " ", html))).strip()
@@ -181,7 +179,36 @@ def deadline_from_text(text):
     except (ValueError, TypeError):
         return None
 
-def review(title, article_url, html="", description="", now=None):
+PRO_SHORT = re.compile(r'(?<![가-힣a-z])(?:프로|pro)(?=$|[\s\d!?+~,.;:]|[가는를도에로만랑와은])', re.I)
+NON_CONSOLE = re.compile(r'듀얼센스|듀센|컨트롤러|패드|포탈|포털|portal|헤드셋|이어버드|충전|거치대|스탠드|보호필름|케이스|커버|디스크\s*드라이브|PS\s*(?:N|PLUS|플러스)|프슨플|구독|기프트|DLC|게임\s*(?:타이틀|패키지|소프트)|지원\s*게임', re.I)
+HARDWARE = re.compile(r'본체|콘솔|2\s*TB|CFI[-\s]*7122B',re.I)
+RESTOCK = re.compile(r'풀렸|풀림|풀린|떴|떳|뜬|입고|취소분|취소\s*할|물량|응모|추첨',re.I)
+OWNER = re.compile(r'^(?:\s*(?:오우너|소유|보유|쓰고|사용|가지고|지원)|(?:에서|으로|로)\s*(?:플레이|돌리|게임))',re.I)
+COMPATIBILITY = re.compile(r'(?:PS\s*5\s*Pro|플스\s*5?\s*프로|프로)\s*(?:용|호환|전용|에서|지원)',re.I)
+
+class ReviewUnavailable(RuntimeError):
+    """Body could not be read; keep it pending instead of marking it reviewed."""
+
+def has_pro(text, scoped):
+    match=PRODUCT.search(text) or (PRO_SHORT.search(text) if scoped else None)
+    return bool(match and not OWNER.search(text[match.end():]))
+
+def purchase_signal(text):
+    return bool(SALE.search(text) or COMMUNITY_CUES.search(text))
+
+def console_subject(text, scoped):
+    if not has_pro(text,scoped):return False
+    if COMPATIBILITY.search(text):return False
+    # Accessory references can be a console bundle; ownership/compatibility
+    # mentions do not turn an accessory or game into a console offer.
+    if NON_CONSOLE.search(text):
+        bundle=bool(re.search(r'본체|콘솔|2\s*TB',text,re.I) or re.search(r'(?:프로|pro)\s*\+|(?:프로|pro).*?(?:번들|세트|인질|포함)|(?:번들|세트|인질).*?(?:프로|pro)',text,re.I)
+                    or (PRICE.search(text) and re.search(r'(?:프로|pro)\s*(?:지금\s*)?(?:결제|구매|풀렸)',text,re.I)))
+        if re.search(r'(?:드라이브|듀얼센스|듀센|컨트롤러|패드).*?단품',text,re.I):return False
+        if not bundle:return False
+    return True
+
+def review(title, article_url, html="", description="", now=None, image_text="", linked_text="", image_status=None):
     """Review title and available body for a current actionable PS5 Pro sale.
 
     Return None for clearly ended or unrelated listings. If body
@@ -194,7 +221,9 @@ def review(title, article_url, html="", description="", now=None):
     source.feed(scoped_html)
     article_text = re.sub(r"\s+", " ", unescape(" ".join(source.text))).strip()
     description_text = plain(description or "")
-    context = " ".join([title, description_text, article_text[:20000]])
+    # Feed descriptions are candidate hints, never proof when the source
+    # body contradicts them. Keep post, image and linked subject separately.
+    context = " ".join([title, article_text[:20000], image_text, linked_text])
     # Read the body BEFORE deciding. In a PS gallery, '프로', store-only,
     # '취소분 샀다', or a bare product link can be an actionable lead.
     links = list(source.links)
@@ -204,23 +233,37 @@ def review(title, article_url, html="", description="", now=None):
     links.extend((u.rstrip('.,);]'), '링크') for u in re.findall(r'https?://[^\s<>"\']+', unescape(article_text+' '+description_text)))
     destination = choose_link(article_url, links)
     scoped = is_ps_board(article_url)
-    product = bool(PRODUCT.search(context) or (scoped and re.search(r'프로|\bpro\b',context,re.I)))
-    platform = bool(PLATFORM.search(context) or scoped)
     images = [urllib.parse.urljoin(article_url, u) for u in source.images if safe_public_url(urllib.parse.urljoin(article_url,u))]
-    signal = bool(SALE.search(context) or COMMUNITY_CUES.search(context) or destination
-                  or (product and images))
-    implied = scoped and bool(RETAILER.search(context) or COMMUNITY_CUES.search(context) or destination)
-    if not ((product or platform or implied) and signal):
+    title_product=console_subject(title,scoped)
+    body_product=any(console_subject(part,scoped) and purchase_signal(part)
+                     for part in re.split(r'[\n.!?。]+',article_text))
+    linked_product=console_subject(linked_text,False)
+    image_product=console_subject(image_text,False)
+    product=title_product or body_product or linked_product or image_product
+    signal=purchase_signal(title+' '+article_text) or bool(destination) or bool(image_product and images)
+    # A board name, generic shopping link, or image presence is not console
+    # evidence. An unnamed *restock* in the PS board is an uncertain lead;
+    # generic "bought it" requires the linked product or image to identify it.
+    implied=scoped and not NON_CONSOLE.search(context) and bool(
+        re.search(r'(?:쿠팡|네이버|플레이샵|겟디즈|겜우리|컴퓨존|SSG|쓱)(?:에|에서)?\s*(?:(?:방금|지금|또|다시)\s*)?(?:풀렸|풀림|풀린|떴)',title,re.I)
+        or re.search(r'^(?:신규\s*물량|물량\s*입고|취소분\s*샀)',title)
+        or (RETAILER.search(title) and purchase_signal(title) and re.search(r'플스인거|본체|콘솔',article_text)))
+    if not ((product or implied) and signal):
+        return None
+    # When the title explicitly sells another class of goods, only actual
+    # console bundle evidence from that post can override it.
+    if NON_CONSOLE.search(title) and not title_product and not linked_product and not image_product and not body_product:
         return None
     # Keep uncertain leads, including bundles/price mismatches, as the user
     # requested. A lead is never represented as validated stock or a purchase.
     if (CLOSED_TITLE.search(title) or NEGATIVE.search(title)) and not REOPENED.search(title):
         return None
-    if re.search(r'보호필름|기프트\s*카드|충전기|게임\s*타이틀',title,re.I):
-        return None
     warnings = []
     if not product:
-        warnings.append('PS5 Pro 여부 미확인: 게시판·본문 맥락상 구매 관련 제보')
+        warnings.append('PS5 Pro 여부 미확인: 본문을 읽은 재입고 제보이며 기종 확인 필요')
+    if images:
+        warnings.append('본문 사진 OCR: '+(image_status or ('판독됨 · 오인식 가능' if image_text else '미판독 · 사진 자체를 본체 증거로 사용하지 않음')))
+    if re.search(r'풀거\s*같|풀릴\s*듯|새야겠',context):warnings.append('작성자의 예상 포함: 실제 판매 시작 미확인')
     if BAD_GOODS.search(title) or re.search(r'번들|인질|듀센|\+\s*듀얼센스',title,re.I):
         warnings.append('구성 확인 필요: 번들·중고·기타 조건이 포함될 수 있음')
     if CLOSED_TITLE.search(context) or NEGATIVE.search(context):
@@ -250,26 +293,66 @@ def review(title, article_url, html="", description="", now=None):
         "product_confirmed": product,
         "evidence": context[:500],
         "images": images[:3],
+        "image_text": image_text[:500],
+        "linked_subject": linked_text[:300],
+        "decision_basis": 'console subject' if product else 'unnamed restock report',
     }
 
-def inspect(title, url, description="", fetcher=None, now=None):
+def fetch_public(url, referer=None, binary=False):
+    if not monitor_window.is_active_at():raise ReviewUnavailable('Monitoring window ended')
+    if not safe_public_url(url):raise ReviewUnavailable('Invalid public URL')
+    class Redirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            if not safe_public_url(newurl):raise ReviewUnavailable('Invalid redirect')
+            return super().redirect_request(req,fp,code,msg,headers,newurl)
+    headers={'User-Agent':'Mozilla/5.0 (compatible; PS5ProSaleNotice/1.0)','Accept':'image/*' if binary else 'text/html'}
+    if referer:headers['Referer']=referer
+    req=urllib.request.Request(urllib.parse.quote(url,safe=':/?&=%#+'),headers=headers)
+    with urllib.request.build_opener(Redirect()).open(req,timeout=6) as response:
+        raw=response.read(4_000_001 if binary else 1_000_000)
+        return raw if binary else raw.decode(response.headers.get_content_charset() or 'utf-8',errors='replace')
+
+def inspect(title, url, description="", fetcher=None, now=None, ocr=None):
     if not safe_public_url(url):
         return None
-    html = ""
     try:
-        if fetcher is not None:
-            html = fetcher(url)
-        elif monitor_window.is_active_at():
-            req = urllib.request.Request(url, headers={
-                "User-Agent": "Mozilla/5.0 (compatible; PS5ProSaleNotice/1.0)",
-                "Accept": "text/html",
-            })
-            with urllib.request.urlopen(req, timeout=6) as response:
-                data = response.read(500_000)
-                html = data.decode(response.headers.get_content_charset() or "utf-8", errors="replace")
+        html=(fetcher or fetch_public)(url)
     except Exception as exc:
-        print(f"Sale article unavailable: {type(exc).__name__}")
-    return review(title, url, html, description, now)
+        raise ReviewUnavailable('Post fetch failed: '+type(exc).__name__) from None
+    main,metadata=post_content.extract(html,url)
+    if not main or re.search(r'<title[^>]*>\s*(?:just a moment|access denied|attention required)',html,re.I):
+        raise ReviewUnavailable('Recognizable post body unavailable')
+    page=Article();page.feed(main)
+    text=' '.join(page.text)
+    if not text.strip() and not page.images and not page.links:raise ReviewUnavailable('Empty post')
+    linked='';image_text='';statuses=[]
+    links=page.links+[(u,'링크') for u in re.findall(r'https?://[^\s<>"\']+',text)]
+    destination=choose_link(url,links)
+    if destination:
+        try:
+            linked_html=(fetcher or fetch_public)(destination)
+            linked_main,linked_meta=post_content.extract(linked_html,destination)
+            # Read the product heading, not every other item on the shop page.
+            linked=linked_meta.get('heading') or linked_meta.get('og:title','')
+        except Exception:statuses.append('연결 상품 페이지 접근 불가')
+    # OCR candidate pictures only, not every screenshot in unrelated game chat.
+    candidate=purchase_signal(title+' '+text) or bool(destination) or has_pro(title,is_ps_board(url))
+    if candidate:
+        for href in page.images[:2]:
+            image_url=urllib.parse.urljoin(url,href)
+            if not safe_public_url(image_url):continue
+            try:
+                if ocr:recognized,status=ocr(image_url,url)
+                else:recognized,status=image_ocr.recognize(fetch_public(image_url,referer=url,binary=True))
+                image_text+='\n'+recognized;statuses.append(status)
+            except Exception:statuses.append('image unavailable')
+    result=review(title,url,html,description,now,image_text,linked,'; '.join(statuses))
+    print('REVIEW '+json.dumps({'title':title,'url':url,'body_read':True,'decision':'lead' if result else 'reject',
+          'basis':result.get('decision_basis') if result else 'no console purchase evidence',
+          'linked_subject':linked[:180],'ocr':statuses},ensure_ascii=False),flush=True)
+    if result:
+        result['published_hint']=metadata.get('article:published_time') or metadata.get('datepublished') or metadata.get('date')
+    return result
 
 def format_alert(lead, source, published):
     kind = "응모·판매 정보" if ("응모" in lead["title"] or "추첨" in lead["title"]) else "판매·특가 정보"

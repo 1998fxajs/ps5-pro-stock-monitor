@@ -22,9 +22,14 @@ class CatalogTests(unittest.TestCase):
         out = c.discover(c.STORE_LISTS[2], html)
         self.assertEqual(len(out), 1)
 
-    def test_bundle_does_not_trigger(self):
-        html = '<a href="/product/bundle/19999">PS5 Pro 2TB + 듀얼센스 세트</a>'
-        self.assertEqual(c.discover(c.STORE_LISTS[0], html), {})
+    def test_console_bundles_reach_body_review(self):
+        for name in ('PS5 Pro 2TB + 듀얼센스 세트','PS5 Pro 본체 + 디스크 드라이브'):
+            html='<a href="/product/bundle/19999">'+name+'</a>'
+            self.assertEqual(len(c.discover(c.STORE_LISTS[0],html)),1)
+
+    def test_accessory_only_is_not_a_console_bundle(self):
+        html='<a href="/product/drive/19999">PS5 Pro 디스크 드라이브 단품</a>'
+        self.assertEqual(c.discover(c.STORE_LISTS[0],html),{})
 
     def test_wrong_host_not_allowed(self):
         self.assertFalse(c.allow_url("https://evilgamewoori.com/product/ps5-pro/16602", c.STORE_LISTS[0]))
