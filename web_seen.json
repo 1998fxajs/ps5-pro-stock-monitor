@@ -31,16 +31,17 @@
     "db0051ff39d6b62d6f2d1973",
     "4768678bbf11caecd269f3d4",
     "ae221df122398b5147180353",
-    "89626010694974d1429f09db"
+    "89626010694974d1429f09db",
+    "a11e0d80ca4e0e97dff31eb3"
   ],
   "last_scan": {
-    "at": "2026-11-17T14:27:43.778361+09:00",
+    "at": "2026-11-17T14:31:32.009570+09:00",
     "sources_ok": 2,
     "sources_failed": 7,
     "results": 1,
-    "alerts": 0,
+    "alerts": 1,
     "deferred": 0,
-    "pending_body": 1,
+    "pending_body": 0,
     "failed_alerts": 0
   }
 }
