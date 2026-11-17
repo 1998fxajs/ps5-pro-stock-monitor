@@ -32,16 +32,17 @@
     "4768678bbf11caecd269f3d4",
     "ae221df122398b5147180353",
     "89626010694974d1429f09db",
-    "a11e0d80ca4e0e97dff31eb3"
+    "a11e0d80ca4e0e97dff31eb3",
+    "13f9e304dfccfe1ed28e08fb"
   ],
   "last_scan": {
-    "at": "2026-11-17T21:18:19.653922+09:00",
+    "at": "2026-11-17T21:21:30.709377+09:00",
     "sources_ok": 2,
     "sources_failed": 7,
     "results": 2,
     "alerts": 0,
     "deferred": 0,
-    "pending_body": 2,
-    "failed_alerts": 0
+    "pending_body": 0,
+    "failed_alerts": 1
   }
 }
