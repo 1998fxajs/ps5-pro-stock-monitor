@@ -35,6 +35,8 @@ FEEDS = [
     ("모델번호 CFI-7122B", '("CFI-7122B" OR "CFI 7122B") (판매 OR 입고 OR 특가 OR 예약 OR 프로모션)'),
     ("국내 마켓", '("PS5 Pro" OR "PS5 프로") (지마켓 OR G마켓 OR SSG OR 쓱 OR 이마트 OR 디지털그랩 OR 네이버 OR 네이버플러스스토어 OR 쿠팡 OR 11번가 OR 롯데온 OR 롯데하이마트)'),
     ("SSG 새 판매/특가 공지", '("PS5 Pro" OR "PS5 프로" OR "플레이스테이션 5 프로" OR "플스5 프로") (SSG OR "SSG.COM" OR 이마트몰 OR 신세계몰 OR 쓱라이브 OR 쓱) (입고 OR 재입고 OR 판매 OR 특가 OR 타임딜 OR 예약 OR 한정 OR 행사 OR 오픈)'),
+    ("쿠팡 PS5 Pro 판매 제보", '("PS5 Pro" OR "PS5프로" OR "PS5 프로" OR "플스5 프로" OR "플스 프로" OR "플레이스테이션 5 프로") (쿠팡 OR Coupang OR 로켓배송 OR 로켓와우) (판매 OR 재입고 OR 입고 OR 풀림 OR 풀렸다 OR 풀렸 OR 떴다 OR 떳다 OR 뜸 OR 열림 OR 구입 OR 결제 OR 정가 OR 물량)'),
+    ("쿠팡 커뮤니티 제보", '("PS5 Pro" OR "PS5프로" OR "플스 프로" OR "플스5 프로") (쿠팡 OR 로켓배송) (site:gall.dcinside.com OR site:fmkorea.com OR site:ppomppu.co.kr OR site:quasarzone.com OR site:ruliweb.com)'),
     ("G마켓 공개 판매글", '("PS5 Pro" OR "PS5프로" OR "플스5 프로" OR "플레이스테이션 5 프로") (G마켓 OR 지마켓 OR Gmarket OR "G마켓 슈퍼딜") (판매 OR 재고 OR 재입고 OR 할인 OR 특가 OR 선착순 OR 추첨)'),
     ("공식·게임 전문점", '("PS5 Pro" OR "플스5 프로") (오진상사 OR 플레이샵 OR 컴퓨존 OR 겜우리 OR 겟디즈 OR 겟디스 OR get-these OR THESE OR 전자랜드)'),
     ("플레이샵 판매·재입고 예고", '("PS5 Pro" OR "PS5 프로" OR "플레이스테이션5 프로" OR "플스5 프로") ("플레이샵" OR "오진상사" OR "PlayShop") (재입고 OR 판매 OR 추첨 OR 응모 OR 선착순 OR 입고 OR 오픈 OR 예약판매)'),
@@ -62,7 +64,7 @@ EXCLUDE = re.compile(
     r"해외\s*직구|해외배송|미국\s*정품|해외\s*정품|예약\s*게임)",
     re.I,
 )
-SIGNAL = re.compile(r"판매|재고|입고|구매|추첨|응모|핫딜|특가|할인|프로모션|순차출고|오픈|물량|한정수량|선착순|픽업|예약|래플|드롭|특판|구입가능|공구", re.I)
+SIGNAL = re.compile(r"판매|재고|입고|구매|추첨|응모|핫딜|특가|할인|프로모션|순차출고|오픈|물량|한정수량|선착순|픽업|예약|래플|드롭|특판|구입가능|공구|풀림|풀렸|풀렸다|풀렸네|풀린|떴다|떴네|떳다|뜸|열렸다|열림|올라왔|로켓배송|정가판매", re.I)
 
 def request(url, data=None, headers=None, method=None):
     h = {"User-Agent": "Mozilla/5.0 (compatible; PS5ProPromoWatch/1.0)",
