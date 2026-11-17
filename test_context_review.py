@@ -23,6 +23,7 @@ class ContextTests(unittest.TestCase):
             ('PS5 GTA6 예약구매','PlayStation5 게임 패키지 쿠팡 링크'),
             ('쿠팡 어크 풀렸다','39800원 지금 구매됨'),
             ('PS5 Pro 디스크 드라이브 단품','PS5 Pro 호환 상품 판매'),
+            ('PS5 Pro 세트 판매','본체 미포함. 듀얼센스만 판매합니다'),
         ]
         for title,body in rows:
             with self.subTest(title=title):self.assertIsNone(s.review(title,POST,'<div class="write_div">'+body+'</div>',now=NOW))

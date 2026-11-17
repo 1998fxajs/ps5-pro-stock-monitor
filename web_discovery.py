@@ -103,7 +103,7 @@ def main():
             except Exception as exc:
                 failures+=1
                 print(f"WEB {source['label']}: unavailable {type(exc).__name__}")
-    sent=0; processed=[]; failed_alerts=[]
+    sent=0; processed=[]; failed_alerts=[]; pending=[]
     # A backlog is left unseen; it is not silently marked delivered.
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         tasks={pool.submit(review.inspect,row['title'],row['link'],row['description']):(key,row)
@@ -117,12 +117,15 @@ def main():
                 elif lead:
                     print('WEB withheld old/undated result: '+row['link'])
                 processed.append(key)
+            except review.ReviewUnavailable as exc:
+                pending.append(key)
+                print('WEB pending body review: '+row['link']+' '+str(exc))
             except Exception as exc:
                 failed_alerts.append(key)
                 print('WEB alert retained for retry: '+type(exc).__name__)
     state['last_scan']={'at':datetime.now(review.KST).isoformat(),'sources_ok':successes,
                         'sources_failed':failures,'results':len(items),'alerts':sent,
-                        'deferred':max(0,len(items)-32),'failed_alerts':len(failed_alerts)}
+                        'deferred':max(0,len(items)-32),'pending_body':len(pending),'failed_alerts':len(failed_alerts)}
     if processed or sha is None:
         state['seen']=list(dict.fromkeys(state.get('seen',[])+processed))[-4000:]
     # Persist this cycle's health even when no new result exists. Otherwise a

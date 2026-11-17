@@ -232,6 +232,10 @@ def review(title, article_url, html="", description="", now=None, image_text="",
     # Feed descriptions are candidate hints, never proof when the source
     # body contradicts them. Keep post, image and linked subject separately.
     context = " ".join([title, article_text[:20000], image_text, linked_text])
+    # An explicit composition statement in the post overrides a matching
+    # product word in its headline (e.g. an accessory for PS5 Pro).
+    if re.search(r'본체\s*(?:는\s*)?(?:미포함|불포함|별도|없음)|(?:패드|컨트롤러|듀얼센스|디스크\s*드라이브|게임\s*타이틀)만\s*(?:판매|팝|포함)',article_text,re.I):
+        return None
     # Read the body BEFORE deciding. In a PS gallery, '프로', store-only,
     # '취소분 샀다', or a bare product link can be an actionable lead.
     links = list(source.links)
