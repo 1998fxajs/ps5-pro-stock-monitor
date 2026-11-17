@@ -40,9 +40,9 @@
     "4f57338062037bda7f381380"
   ],
   "last_scan": {
-    "at": "2026-11-18T08:33:43.243189+09:00",
-    "sources_ok": 3,
-    "sources_failed": 6,
+    "at": "2026-11-18T08:38:43.324368+09:00",
+    "sources_ok": 2,
+    "sources_failed": 7,
     "results": 6,
     "alerts": 0,
     "deferred": 0,
