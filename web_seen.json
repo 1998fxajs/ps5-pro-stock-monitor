@@ -35,11 +35,11 @@
     "a11e0d80ca4e0e97dff31eb3"
   ],
   "last_scan": {
-    "at": "2026-11-17T14:31:32.009570+09:00",
+    "at": "2026-11-17T14:36:29.652786+09:00",
     "sources_ok": 2,
     "sources_failed": 7,
-    "results": 1,
-    "alerts": 1,
+    "results": 0,
+    "alerts": 0,
     "deferred": 0,
     "pending_body": 0,
     "failed_alerts": 0
