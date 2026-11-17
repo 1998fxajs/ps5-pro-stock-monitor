@@ -48,6 +48,20 @@ class MarketplaceTests(unittest.TestCase):
     def test_real_other_console_cannot_become_pro_stock(self):
         self.assertEqual(r.parse_product(GM, fixture('gmarket_structure'))['status'], 'unknown')
 
+    def test_real_naver_primary_detail_summary_is_direct_inventory(self):
+        html = fixture('naver_direct')
+        with patch.object(r, 'fetch', return_value=html) as fetch:
+            result = r.check_public(NV)
+        self.assertEqual(result['status'], 'out_of_stock')
+        self.assertEqual(result['evidence_type'], 'direct_product')
+        self.assertEqual(result['stock_quantity'], 0)
+        fetch.assert_called_once_with(NV['url'])
+
+    def test_detail_summary_does_not_override_a_different_primary_item(self):
+        state = m.assignment(fixture('naver_direct'), '__PRELOADED_STATE__')
+        state['product']['id'] = 999
+        self.assertEqual(m.naver(NV, nv_page(state))['status'], 'unknown')
+
     def test_gmarket_seller_change_blocks_stock_signal(self):
         self.goods['seller']['SellerId'] = 'different_seller'
         self.assertEqual(m.gmarket(GM, gm_page(self.goods, self.event))['status'], 'unknown')

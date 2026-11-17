@@ -115,6 +115,11 @@ def naver(store, html, catalogue=False):
                         and str(p.get('id')) == store['product_id']), {})
     else:
         product = state.get('product') or {}
+        # Current public detail pages populate this primary detail summary
+        # while leaving the older product object empty. It is not a related
+        # item list. Do not use it to override a different primary item ID.
+        if product.get('id') is None:
+            product = state.get('simpleProductForDetailPage') or {}
     if str(product.get('id')) != store['product_id']:
         return unknown('Naver requested product absent from primary product data')
     if str((product.get('channel') or {}).get('channelNo')) != store['channel_id']:

@@ -13,6 +13,10 @@
     "naver_catalogue": {
       "source": "https://brand.naver.com/playshop/category/573e641896a64ee9a94ef552b6df37d4?cp=1",
       "raw_sha256": "1af9475e99f781a9c4ec3f2396b841b25226f21ef51f22540540131d8701b176"
+    },
+    "naver_direct": {
+      "source": "https://brand.naver.com/playshop/products/10897976014",
+      "raw_sha256": "36c32733dfbea9c42ce3c0c98662c6c06499d0d9bb37f542b39a5dd03e423427"
     }
   }
 }
