@@ -37,13 +37,13 @@
     "c0fa30da32983e58d7755f8a"
   ],
   "last_scan": {
-    "at": "2026-11-18T03:52:35.413443+09:00",
+    "at": "2026-11-18T03:57:36.228610+09:00",
     "sources_ok": 2,
     "sources_failed": 7,
-    "results": 0,
+    "results": 1,
     "alerts": 0,
     "deferred": 0,
-    "pending_body": 0,
+    "pending_body": 1,
     "failed_alerts": 0
   }
 }
