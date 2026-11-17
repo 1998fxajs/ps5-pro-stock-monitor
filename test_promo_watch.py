@@ -45,7 +45,7 @@ class PromoTitleTests(unittest.TestCase):
             with self.subTest(title=title):
                 self.assertIsNotNone(p.EXCLUDE.search(title), title)
 
-    def test_playshop_search_only_coverage(self):
+    def test_playshop_community_search_coverage_preserved(self):
         queries = " ".join(query for label, query in p.FEEDS if "플레이샵" in label)
         self.assertIn("플레이샵", queries)
         self.assertIn("오진상사", queries)

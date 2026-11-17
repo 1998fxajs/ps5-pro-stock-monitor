@@ -1,6 +1,6 @@
 {
   "checked_at": "2026-11-17",
-  "notes": "Registered from public research. Sources can fail or index late. No claim of exhaustive internet coverage. Existing Gmarket/PlayShop direct stock exclusions retained.",
+  "notes": "Official Gmarket and Naver product pages are now directly polled by retail_watch. Own-site PlayShop inventory remains excluded. Catalogue evidence is labelled separately from direct product access. Sources can fail or index late; no exhaustive coverage claim.",
   "discovery": [
     {
       "label": "일반 웹 검색: 플스",

@@ -1,0 +1,31 @@
+name: Verify official marketplace pages and Telegram
+on:
+  push:
+    branches: [main]
+    paths:
+      - validate_marketplaces_live.py
+      - .github/workflows/validate-marketplaces.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify marketplace parsing and notification transitions
+        run: python3 -m unittest discover -v
+      - name: Read actual pages and send one labelled verification message
+        run: python3 -u validate_marketplaces_live.py
+        env:
+          SEND_TEST_ALERT: ${{ github.run_attempt == 1 && '1' || '0' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - name: Preserve source outcomes and Telegram receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: marketplace-live-validation
+          path: marketplace-validation.json
+          if-no-files-found: warn

@@ -25,11 +25,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test promotion keyword and PlayShop search coverage
         run: python3 -m unittest discover -v
-      - name: Confirm no PlayShop direct inventory polling
+      - name: Confirm official marketplace products and preserve own-site exclusion
         run: |
           python3 - <<'PY'
           import retail_watch, catalog_watch
-          ids = [s["id"] for s in retail_watch.STORES] + [s["id"] for s in catalog_watch.STORE_LISTS]
-          assert "playshop" not in ids and "ojin" not in ids, ids
-          print("PlayShop/Ojin remain search-only")
+          from urllib.parse import urlsplit
+          stores = retail_watch.STORES + catalog_watch.STORE_LISTS
+          assert all(urlsplit(s['url']).hostname not in ('playshop.co.kr', 'www.playshop.co.kr', 'ojinplaystation.cafe24.com') for s in stores)
+          ids = {s['id'] for s in retail_watch.STORES}
+          assert {'gmarket_playshop', 'naver_playshop', 'coupang_reported'} <= ids, ids
+          print('Official Gmarket/Naver product pages registered; own-site inventory exclusion preserved')
           PY

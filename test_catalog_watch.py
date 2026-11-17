@@ -34,7 +34,7 @@ class CatalogTests(unittest.TestCase):
     def test_wrong_host_not_allowed(self):
         self.assertFalse(c.allow_url("https://evilgamewoori.com/product/ps5-pro/16602", c.STORE_LISTS[0]))
 
-    def test_gmarket_not_directly_polled(self):
+    def test_catalogue_sources_preserved_with_marketplaces_in_retail_watch(self):
         self.assertEqual(len(c.STORE_LISTS), 4)
         self.assertTrue(all("gmarket" not in x["id"] for x in c.STORE_LISTS))
 

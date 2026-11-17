@@ -2,7 +2,7 @@
 """Discover newly published PS5 Pro product URLs from public store listings.
 
 New listing alerts are *leads*, not proof of stock or price.
-Gmarket is deliberately excluded from direct store access.
+Official Gmarket and Naver individual products are polled by retail_watch.
 """
 import base64
 import concurrent.futures

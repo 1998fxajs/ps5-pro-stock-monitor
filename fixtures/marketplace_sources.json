@@ -1,0 +1,18 @@
+{
+  "observed_date_kst": "2026-11-17",
+  "note": "Reduced public HTML script data; unrelated and personal fields removed. Positive Pro stock mutations in tests are synthetic, not live inventory.",
+  "sources": {
+    "gmarket_candidate_1": {
+      "source": "https://item.gmarket.co.kr/Item?goodscode=4146068876",
+      "raw_sha256": "76d24a868f87fd2af222e0cc1370c54b9e909ec08866ffb2f6c8e95dfba8ad6c"
+    },
+    "gmarket_structure": {
+      "source": "https://item.gmarket.co.kr/Item?goodscode=4570792158",
+      "raw_sha256": "b22f16927363bb7d3f16f15f24e5037bd058781a10ffbc0470680e76e254449a"
+    },
+    "naver_catalogue": {
+      "source": "https://brand.naver.com/playshop/category/573e641896a64ee9a94ef552b6df37d4?cp=1",
+      "raw_sha256": "1af9475e99f781a9c4ec3f2396b841b25226f21ef51f22540540131d8701b176"
+    }
+  }
+}

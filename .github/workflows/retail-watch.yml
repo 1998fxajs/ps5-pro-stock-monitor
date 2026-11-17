@@ -9,6 +9,8 @@ on:
     branches: [main]
     paths:
       - retail_watch.py
+      - marketplace_stock.py
+      - test_marketplace_stock.py
       - watch_loop.py
       - monitor_window.py
       - notifications.py

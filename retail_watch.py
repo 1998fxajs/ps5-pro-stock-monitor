@@ -9,6 +9,7 @@ import base64
 from notifications import telegram
 import monitor_window
 import sale_link_review
+import marketplace_stock
 import concurrent.futures
 import json
 import os
@@ -24,6 +25,27 @@ from urllib.parse import urlencode
 STATE = "retail_state.json"
 PRICE_CEILING = 1_298_000
 STORES = [
+    {
+        "id": "gmarket_playshop",
+        "name": "지마켓 PlayShop / 오진상사 (공식 인증점)",
+        "url": "https://item.gmarket.co.kr/Item?goodscode=4146068876",
+        "type": "gmarket",
+        "product_id": "4146068876",
+        "seller_id": "ojintest",
+        "title": r"(?:PS\s*5|PlayStation\s*5|플레이스테이션\s*5)\s*(?:Pro|프로)",
+        "official_source": "https://www.playstation.com/ko-kr/local/retailers-list/",
+    },
+    {
+        "id": "naver_playshop",
+        "name": "네이버 PlayShop / 오진상사 (공식 인증점)",
+        "url": "https://brand.naver.com/playshop/products/10897976014",
+        "catalogue_url": "https://brand.naver.com/playshop/category/573e641896a64ee9a94ef552b6df37d4?cp=1",
+        "type": "naver",
+        "product_id": "10897976014",
+        "channel_id": "100217750",
+        "title": r"(?:PS\s*5|PlayStation\s*5|플레이스테이션\s*5)\s*(?:Pro|프로)",
+        "official_source": "https://www.playstation.com/ko-kr/local/retailers-list/",
+    },
     {
         "id": "coupang_reported",
         "name": "쿠팡 (커뮤니티에서 발견한 프로 + 듀얼센스 상품)",
@@ -159,6 +181,10 @@ def structured_status(html, store):
     return None
 
 def parse_product(store, html):
+    if store['type'] == 'gmarket':
+        return marketplace_stock.gmarket(store, html)
+    if store['type'] == 'naver':
+        return marketplace_stock.naver(store, html)
     text = clean_text(html)
     if not re.search(store["title"], text, re.I):
         return {"status": "unknown", "reason": "expected product title absent"}
@@ -189,8 +215,34 @@ def parse_product(store, html):
     return {"status": "unknown", "reason": "no validated explicit product-level in-stock signal"}
 
 def check(store):
+    if store['type'] == 'naver':
+        try:
+            direct = parse_product(store, fetch(store['url']))
+            direct['http_status'] = 200
+        except Exception as exc:
+            direct = error_result(exc)
+        direct['checked_url'] = store['url']
+        direct['direct_status'] = direct['status']
+        if direct['status'] not in ('access_denied', 'unavailable', 'unknown'):
+            return direct
+        # The store's ordinary public console catalogue independently exposes
+        # this exact item ID. This does not make the blocked direct check pass.
+        # No alternate identity, proxy, login, hidden API or protection bypass.
+        try:
+            listing = marketplace_stock.naver(store, fetch(store['catalogue_url']), catalogue=True)
+            if listing['status'] != 'unknown':
+                listing.update(checked_url=store['catalogue_url'], http_status=200,
+                               direct_status=direct['status'],
+                               direct_http_status=direct.get('http_status'),
+                               direct_reason=direct['reason'])
+                return listing
+            direct['catalogue_reason'] = listing['reason']
+        except Exception as exc:
+            direct['catalogue_reason'] = error_result(exc)['reason']
+        return direct
     if store["type"] != "ssg":
-        return parse_product(store, fetch(store["url"]))
+        return dict(parse_product(store, fetch(store["url"])),
+                    http_status=200, checked_url=store['url'])
     # Each of these are SSG's ordinary public product-page URLs for the
     # same verified item ID. No login, CAPTCHA, proxy, or protection bypass.
     failures = []
@@ -220,6 +272,22 @@ def check(store):
             "reason": "All SSG public page variants lacked verified stock signal: " +
                       "; ".join((unknowns + failures)[:8])}
 
+
+def error_result(exc):
+    if isinstance(exc, HTTPError):
+        return {'status': 'access_denied' if exc.code in (401, 403, 429) else 'unavailable',
+                'http_status': exc.code,
+                'reason': f'public HTTP request returned {exc.code}; direct stock check unavailable'}
+    return {'status': 'unavailable', 'reason': f'{type(exc).__name__}: public page read failed'}
+
+
+def check_public(store):
+    """Shared live-check path for the monitor and read-only validation."""
+    try:
+        return check(store)
+    except Exception as exc:
+        return dict(error_result(exc), checked_url=store['url'])
+
 def gh(path, payload=None):
     repo = os.environ["GITHUB_REPOSITORY"]
     token = os.environ["GITHUB_TOKEN"]
@@ -243,6 +311,9 @@ def load_state():
         raise
 
 def save_state(data, sha):
+    if os.environ.get('MONITOR_DRY_RUN') == '1':
+        print('DRY RUN: retailer state not saved')
+        return
     content = base64.b64encode((json.dumps(data, ensure_ascii=False, indent=2)+"\n").encode()).decode()
     payload = {"message": "chore: record retailer state transitions", "content": content}
     if sha:
@@ -256,7 +327,7 @@ def main():
     state, sha = load_state()
     results = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        futures = {pool.submit(check, site): site for site in STORES}
+        futures = {pool.submit(check_public, site): site for site in STORES}
         for future in concurrent.futures.as_completed(futures):
             site = futures[future]
             try:
@@ -299,9 +370,16 @@ def main():
                 f"상품: {result.get('product_name','상품명 확인 필요')}\n"
                 f"{site['url']}\n"
                 +( "기존 단품 희망가격 초과 — 포함 구성과 가격 확인 필요\n" if result.get('above_standalone_price') else "")+
-                "판매처의 공개 상품 데이터가 InStock으로 바뀌었지만 "
+                "판매처의 공개 상품 데이터에서 판매 가능 표기가 확인됐지만 "
                 "실제 주문 가능 여부는 확인되지 않았습니다. "
                 "품절로 표시될 수도 있으니 상품 페이지를 확인하세요."
+            )
+        elif current == 'raffle_signal' and previous != 'raffle_signal':
+            telegram(
+                '[PS5 Pro 공식 추첨 상품 표시 변경 — 일반 구매 재고 아님]\n'
+                f"{site['name']}\n상품: {result['product_name']}\n{site['url']}\n"
+                '추첨 상품의 품절 표기가 해제됐습니다. 응모 기간과 조건을 확인하세요. '
+                '응모용 표시 가격을 본체 판매가격으로 취급하지 않습니다.'
             )
         elif current == "access_denied" and previous != "access_denied":
             telegram(
@@ -318,15 +396,23 @@ def main():
                 f"{site['name']}\n{site['url']}\n"
                 "품절 표시를 기존처럼 확인할 수 없습니다. 구매 가능 재고 확정이 아닙니다."
             )
-        if current != previous:
-            state[key] = {
-                "status": current,
-                "reason": result["reason"],
-                "checked_at": datetime.now(timezone.utc).isoformat(),
-            }
+        previous_direct = state.get(key, {}).get('direct_status')
+        direct_failures = ('access_denied', 'unavailable', 'unknown')
+        if (result.get('direct_status') in direct_failures and current not in direct_failures
+                and previous_direct not in direct_failures):
+            telegram(
+                '[PS5 Pro 직접 감시 일부 제한 — 공식 목록 보조 확인]\n'
+                f"{site['name']}\n{site['url']}\n"
+                f"개별 상품 HTTP {result.get('direct_http_status')}: 직접 재고 확인 불가.\n"
+                f"동일 상품 ID의 공식 콘솔 목록 상태: {current}\n"
+                f"보조 확인: {result['checked_url']}"
+            )
+        if current != previous or result.get('direct_status') != previous_direct:
             changed = True
-    if changed:
-        save_state(state, sha)
+        state[key] = {**result, 'checked_at': datetime.now(timezone.utc).isoformat()}
+    state['_last_scan'] = {'checked_at': datetime.now(timezone.utc).isoformat(),
+                           'stores_checked': len(results)}
+    save_state(state, sha)
     print(f"Retail check complete: {len(results)} shops; state changed={changed}")
 
 if __name__ == "__main__":
