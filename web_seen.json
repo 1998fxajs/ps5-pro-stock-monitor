@@ -34,16 +34,19 @@
     "89626010694974d1429f09db",
     "a11e0d80ca4e0e97dff31eb3",
     "13f9e304dfccfe1ed28e08fb",
-    "c0fa30da32983e58d7755f8a"
+    "c0fa30da32983e58d7755f8a",
+    "c415abecf675cb56a65b3258",
+    "0bb2a8d3047f735c170a4d16",
+    "4f57338062037bda7f381380"
   ],
   "last_scan": {
-    "at": "2026-11-18T07:18:42.785074+09:00",
-    "sources_ok": 2,
-    "sources_failed": 7,
-    "results": 1,
+    "at": "2026-11-18T07:23:44.432512+09:00",
+    "sources_ok": 3,
+    "sources_failed": 6,
+    "results": 10,
     "alerts": 0,
     "deferred": 0,
-    "pending_body": 1,
+    "pending_body": 7,
     "failed_alerts": 0
   }
 }
