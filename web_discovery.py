@@ -120,11 +120,11 @@ def main():
             except Exception as exc:
                 failed_alerts.append(key)
                 print('WEB alert retained for retry: '+type(exc).__name__)
+    state['last_scan']={'at':datetime.now(review.KST).isoformat(),'sources_ok':successes,
+                        'sources_failed':failures,'results':len(items),'alerts':sent,
+                        'deferred':max(0,len(items)-32),'failed_alerts':len(failed_alerts)}
     if processed or sha is None:
         state['seen']=list(dict.fromkeys(state.get('seen',[])+processed))[-4000:]
-        state['last_scan']={'at':datetime.now(review.KST).isoformat(),'sources_ok':successes,
-                            'sources_failed':failures,'results':len(items),'alerts':sent,
-                            'deferred':max(0,len(items)-32),'failed_alerts':len(failed_alerts)}
         save(state,sha)
     print('WEB '+json.dumps(state.get('last_scan',{})))
     if not successes or failed_alerts:raise RuntimeError('Web discovery or delivery failed')

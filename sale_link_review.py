@@ -18,7 +18,7 @@ import post_content
 import image_ocr
 
 KST = ZoneInfo("Asia/Seoul")
-PRODUCT = re.compile(r"(?:\bps\s*5\s*pro\b|play\s*station\s*5\s*pro|ps\s*5\s*프로|플레이\s*스테이션\s*5?\s*프로|플스\s*5?\s*프로|CFI[-\s]*7122B)", re.I)
+PRODUCT = re.compile(r"(?:\bps\s*5\s*pro\b|play\s*station\s*5\s*(?:pro|프로)|ps\s*5\s*프로|플레이\s*스테이션\s*5?\s*(?:프로|pro)|플스\s*5?\s*(?:프로|pro)|CFI[-\s]*7122B)", re.I)
 PLATFORM = re.compile(r"플스|플레이\s*스테이션|플\s*5|ps\s*5|play\s*station|cfi[-\s]*7[01]22", re.I)
 RETAILER = re.compile(r"쿠팡|coupang|네이버|지마켓|G마켓|SSG|쓱|이마트|컴퓨존|겜우리|겟디즈|플레이샵|오진|11번가|하이마트|롯데온", re.I)
 with Path(__file__).with_name('community_language.json').open(encoding='utf-8') as f:
@@ -140,7 +140,7 @@ def choose_link(article_url, links):
             continue
         if not (PATH_GOOD.search(url) or ACTION_WORD.search(label)):
             continue
-        if re.search(r"(?:중고|울버린|리퍼|해외직구|듀얼센스\s*세트)",label,re.I):
+        if re.search(r"(?:중고|리퍼|해외직구)",label,re.I):
             continue
         original = urllib.parse.urlparse(article_url)
         if url.split("#")[0] == article_url.split("#")[0]:
@@ -240,7 +240,7 @@ def review(title, article_url, html="", description="", now=None, image_text="",
     linked_product=console_subject(linked_text,False)
     image_product=console_subject(image_text,False)
     product=title_product or body_product or linked_product or image_product
-    signal=purchase_signal(title+' '+article_text) or bool(destination) or bool(image_product and images)
+    signal=purchase_signal(title+' '+article_text) or bool(destination) or bool(image_product and re.search(r'구매하기|바로구매|장바구니|재입고',image_text))
     # A board name, generic shopping link, or image presence is not console
     # evidence. An unnamed *restock* in the PS board is an uncertain lead;
     # generic "bought it" requires the linked product or image to identify it.
@@ -264,7 +264,7 @@ def review(title, article_url, html="", description="", now=None, image_text="",
     if images:
         warnings.append('본문 사진 OCR: '+(image_status or ('판독됨 · 오인식 가능' if image_text else '미판독 · 사진 자체를 본체 증거로 사용하지 않음')))
     if re.search(r'풀거\s*같|풀릴\s*듯|새야겠',context):warnings.append('작성자의 예상 포함: 실제 판매 시작 미확인')
-    if BAD_GOODS.search(title) or re.search(r'번들|인질|듀센|\+\s*듀얼센스',title,re.I):
+    if BAD_GOODS.search(title) or re.search(r'번들|세트|인질|듀센|\+\s*(?:듀얼센스|디스크)',title,re.I):
         warnings.append('구성 확인 필요: 번들·중고·기타 조건이 포함될 수 있음')
     if CLOSED_TITLE.search(context) or NEGATIVE.search(context):
         warnings.append('품절·종료 언급 포함: 현재 상태 재확인 필요')
@@ -288,7 +288,7 @@ def review(title, article_url, html="", description="", now=None, image_text="",
         "direct_link": bool(destination),
         "deadline": expiry.strftime("%Y-%m-%d %H:%M KST") if expiry else None,
         "price_in_title": min(title_prices) if title_prices else None,
-        "reviewed_body": bool(article_text),
+        "reviewed_body": bool(article_text or images),
         "warnings": warnings,
         "product_confirmed": product,
         "evidence": context[:500],
@@ -347,9 +347,11 @@ def inspect(title, url, description="", fetcher=None, now=None, ocr=None):
                 image_text+='\n'+recognized;statuses.append(status)
             except Exception:statuses.append('image unavailable')
     result=review(title,url,html,description,now,image_text,linked,'; '.join(statuses))
+    if result is None and candidate and page.images and not image_text.strip():
+        raise ReviewUnavailable('Candidate image could not be read; retained for retry')
     print('REVIEW '+json.dumps({'title':title,'url':url,'body_read':True,'decision':'lead' if result else 'reject',
           'basis':result.get('decision_basis') if result else 'no console purchase evidence',
-          'linked_subject':linked[:180],'ocr':statuses},ensure_ascii=False),flush=True)
+          'linked_subject':linked[:180],'ocr':statuses,'ocr_text_excerpt':image_text[:450] if candidate else ''},ensure_ascii=False),flush=True)
     if result:
         result['published_hint']=metadata.get('article:published_time') or metadata.get('datepublished') or metadata.get('date')
     return result

@@ -8,6 +8,7 @@ marker disappeared; it is NOT confirmed available stock.
 import base64
 from notifications import telegram
 import monitor_window
+import sale_link_review
 import concurrent.futures
 import json
 import os
@@ -138,25 +139,23 @@ def structured_status(html, store):
             name = clean_text(str(product.get("name", "")))
             if not re.search(store["title"], name, re.I):
                 continue
-            if re.search(r"디스크\s*드라이브\s*\+|세트|번들|중고|리퍼|해외직구", name, re.I):
+            if not sale_link_review.console_subject(name,False) or re.search(r"중고|리퍼|해외직구", name, re.I):
                 continue
             price = price_of(offer.get("price"))
             currency = str(offer.get("priceCurrency", "")).upper()
             availability = str(offer.get("availability", "")).lower().split("/")[-1]
             if availability in ("outofstock", "soldout", "discontinued"):
                 return {"status": "out_of_stock", "reason": "structured offer says out of stock"}
-            if availability == "instock" and currency == "KRW" and price is not None and price <= PRICE_CEILING:
+            if availability == "instock" and currency == "KRW" and price is not None:
                 # GetThese's structured Offer availability has previously
                 # flipped from InStock to OutOfStock within 15 minutes. It
                 # does not independently prove the checkout accepts orders.
                 # Do not label this unconfirmed schema signal as real stock.
-                if store["id"] == "getthese":
+                if store["id"] == "getthese" or price > PRICE_CEILING:
                     return {"status": "stock_signal",
-                            "reason": "GetThese structured Offer=InStock; checkout not confirmed",
-                            "price": price}
-                return {"status": "in_stock", "reason": "explicit product offer says InStock", "price": price}
-            if availability == "instock" and currency == "KRW" and price is not None and price > PRICE_CEILING:
-                return {"status": "over_budget", "reason": "explicit offer above standalone ceiling", "price": price}
+                            "reason": "structured Offer=InStock; checkout/price/composition need confirmation",
+                            "price": price,"product_name":name,"above_standalone_price":price>PRICE_CEILING}
+                return {"status": "in_stock", "reason": "explicit product offer says InStock", "price": price,"product_name":name}
     return None
 
 def parse_product(store, html):
@@ -287,16 +286,19 @@ def main():
         print(json.dumps({"store": site["name"], **result}, ensure_ascii=False))
         if current == "in_stock" and previous != "in_stock":
             telegram(
-                f"[PS5 Pro 2TB 단품 재고 감지]\n"
+                f"[PS5 Pro 본체 포함 상품 재고 표기 — 확인 필요]\n"
                 f"{site['name']} | {result['price']:,}원\n"
+                f"상품: {result.get('product_name','상품명 확인 필요')}\n"
                 f"{site['url']}\n"
-                "결제 가능 여부와 단품 구성은 최종 확인하세요."
+                "판매처 재고 표기이며 실제 결제 가능 여부와 포함 구성은 확인하세요."
             )
         elif current == "stock_signal" and previous != "stock_signal":
             telegram(
                 "[PS5 Pro 재고 표기 변동 — 실제 구매 가능 여부 미확인]\n"
                 f"{site['name']} | 사이트 표기 {result['price']:,}원\n"
+                f"상품: {result.get('product_name','상품명 확인 필요')}\n"
                 f"{site['url']}\n"
+                +( "기존 단품 희망가격 초과 — 포함 구성과 가격 확인 필요\n" if result.get('above_standalone_price') else "")+
                 "판매처의 공개 상품 데이터가 InStock으로 바뀌었지만 "
                 "실제 주문 가능 여부는 확인되지 않았습니다. "
                 "품절로 표시될 수도 있으니 상품 페이지를 확인하세요."

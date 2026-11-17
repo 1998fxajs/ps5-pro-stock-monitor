@@ -55,7 +55,7 @@ class SaleLinkTests(unittest.TestCase):
         self.assertTrue(all(not s.safe_public_url(u) for u in bad))
 
     def test_bundle_and_resale_are_labelled_not_hidden(self):
-        for title in ("PS5 Pro 울버린 특전 세트 판매", "PS5 Pro 중고 특가"):
+        for title in ("PS5 Pro 디스크 드라이브 포함 세트 판매", "PS5 Pro 중고 특가"):
             self.assertTrue(s.review(title,"https://example.com/a",now=NOW)['warnings'])
 
     def test_news_link_with_official_specific_product_dominates(self):

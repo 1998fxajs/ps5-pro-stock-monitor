@@ -59,6 +59,12 @@ class ContextTests(unittest.TestCase):
         for title in ['PS5 Pro + 듀얼센스 1,399,000원','플스5 프로 번들 재입고','PS5 Pro 본체 + 디스크 드라이브 판매','PS5 Pro 콘솔 액세서리 포함 세트 판매']:
             self.assertIsNotNone(s.review(title,POST,'<div class="write_div">지금 구매됨</div>',now=NOW))
 
+    def test_mixed_korean_english_product_in_real_image(self):
+        self.assertTrue(s.console_subject('플레이스테이션 5 Pro 콘솔 + PS5 듀얼센스 무선 컨트롤러 2p 세트',False))
+
+    def test_console_picture_alone_is_not_sale_signal(self):
+        self.assertIsNone(s.review('프로 그래픽 좋네',POST,'<div class="write_div"><img src="https://dcimg8.dcinside.co.kr/a.jpg"></div>',now=NOW,image_text='PlayStation5 Pro 콘솔 2TB'))
+
     def test_stale_or_unknown_date_web_result_never_alerts(self):
         self.assertFalse(w.is_recent({'title':'PS5 Pro 입고','link':'https://example.com/post'},now=NOW))
         self.assertFalse(w.is_recent({'title':'PS5 Pro 59일전','link':'https://hotdeal.zip/ps5-pro-x'},now=NOW))
