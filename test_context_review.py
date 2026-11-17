@@ -61,6 +61,7 @@ class ContextTests(unittest.TestCase):
 
     def test_mixed_korean_english_product_in_real_image(self):
         self.assertTrue(s.console_subject('플레이스테이션 5 Pro 콘솔 + PS5 듀얼센스 무선 컨트롤러 2p 세트',False))
+        self.assertTrue(s.console_subject('플레이스테이션 5 Pro 2S\n\n+PS5\n\n무선 컨트\n롤러 2p 세트, CFI-\n7122B01',False))
 
     def test_console_picture_alone_is_not_sale_signal(self):
         self.assertIsNone(s.review('프로 그래픽 좋네',POST,'<div class="write_div"><img src="https://dcimg8.dcinside.co.kr/a.jpg"></div>',now=NOW,image_text='PlayStation5 Pro 콘솔 2TB'))

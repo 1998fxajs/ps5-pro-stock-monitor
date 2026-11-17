@@ -197,6 +197,7 @@ def purchase_signal(text):
     return bool(SALE.search(text) or COMMUNITY_CUES.search(text))
 
 def console_subject(text, scoped):
+    text=re.sub(r'\s+',' ',text).strip()
     if not has_pro(text,scoped):return False
     if COMPATIBILITY.search(text):return False
     # Accessory references can be a console bundle; ownership/compatibility
@@ -207,6 +208,13 @@ def console_subject(text, scoped):
         if re.search(r'(?:드라이브|듀얼센스|듀센|컨트롤러|패드).*?단품',text,re.I):return False
         if not bundle:return False
     return True
+
+def product_excerpt(text):
+    # Do not copy payment, order or card details from public receipt pictures
+    # into alerts/logs. Retain only the product-name neighborhood.
+    text=re.sub(r'\s+',' ',text).strip()
+    match=PRODUCT.search(text)
+    return text[match.start():match.end()+140] if match else ''
 
 def review(title, article_url, html="", description="", now=None, image_text="", linked_text="", image_status=None):
     """Review title and available body for a current actionable PS5 Pro sale.
@@ -293,7 +301,7 @@ def review(title, article_url, html="", description="", now=None, image_text="",
         "product_confirmed": product,
         "evidence": context[:500],
         "images": images[:3],
-        "image_text": image_text[:500],
+        "image_text": product_excerpt(image_text),
         "linked_subject": linked_text[:300],
         "decision_basis": 'console subject' if product else 'unnamed restock report',
     }
@@ -351,7 +359,7 @@ def inspect(title, url, description="", fetcher=None, now=None, ocr=None):
         raise ReviewUnavailable('Candidate image could not be read; retained for retry')
     print('REVIEW '+json.dumps({'title':title,'url':url,'body_read':True,'decision':'lead' if result else 'reject',
           'basis':result.get('decision_basis') if result else 'no console purchase evidence',
-          'linked_subject':linked[:180],'ocr':statuses,'ocr_text_excerpt':image_text[:450] if candidate else ''},ensure_ascii=False),flush=True)
+          'linked_subject':linked[:180],'ocr':statuses,'image_product':product_excerpt(image_text)},ensure_ascii=False),flush=True)
     if result:
         result['published_hint']=metadata.get('article:published_time') or metadata.get('datepublished') or metadata.get('date')
     return result

@@ -125,7 +125,9 @@ def main():
                         'deferred':max(0,len(items)-32),'failed_alerts':len(failed_alerts)}
     if processed or sha is None:
         state['seen']=list(dict.fromkeys(state.get('seen',[])+processed))[-4000:]
-        save(state,sha)
+    # Persist this cycle's health even when no new result exists. Otherwise a
+    # previous scan's alert count/time can masquerade as the current result.
+    save(state,sha)
     print('WEB '+json.dumps(state.get('last_scan',{})))
     if not successes or failed_alerts:raise RuntimeError('Web discovery or delivery failed')
 

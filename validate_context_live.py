@@ -32,8 +32,9 @@ def main():
         lead=row.get('lead') or {}
         print('HISTORICAL '+json.dumps({'url':row['url'],'decision':row['decision'],
             'image_text':lead.get('image_text'),'warnings':lead.get('warnings'),'error':row.get('error')},ensure_ascii=False))
-    # Fail loudly if the two manually verified console images cannot be read.
-    if any(r['decision']!='lead' or not (r.get('lead') or {}).get('image_text','').strip() for r in replay[:2]):
+    # 728347 was manually inspected: a game purchase, not a PS5 Pro console.
+    if any(r['decision']!='lead' or not (r.get('lead') or {}).get('image_text','').strip() for r in replay[:3]):
         raise RuntimeError('Historical console image OCR needs review')
+    if replay[3]['decision']!='reject':raise RuntimeError('Unrelated purchase photo was accepted')
 
 if __name__=='__main__':main()
