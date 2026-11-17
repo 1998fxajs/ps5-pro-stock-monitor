@@ -168,7 +168,15 @@ def main():
                     try:
                         lead = task.result()
                         if lead is not None:
-                            telegram(sale_link_review.format_alert(lead, '디시 '+label, dates.get(number)))
+                            receipt = telegram(sale_link_review.format_alert(lead, '디시 '+label, dates.get(number)))
+                            # Keep a bounded delivery trail available during a running
+                            # job, so a false alert can be located without asking the user.
+                            state.setdefault('_alerts', []).append({
+                                'board': board_id, 'post_id': number, 'title': title,
+                                'url': post_url, 'decision_basis': lead.get('decision_basis'),
+                                **receipt,
+                            })
+                            state['_alerts'] = state['_alerts'][-50:]
                             new_count += 1
                         processed.append(number)
                     except Exception as exc:

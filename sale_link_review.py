@@ -188,9 +188,10 @@ COMPATIBILITY = re.compile(r'(?:PS\s*5\s*Pro|플스\s*5?\s*프로|프로)\s*(?:�
 PURCHASE_STORY = re.compile(r'샀|사서|산\s*사람|사버렸|구매\s*(?:함|했|완료|인증|후기|성공)|구입\s*(?:함|했|완료|인증)|결제\s*(?:했|완료)|주문\s*(?:했|완료)|먹었|질렀|지름|도착|수령|언박싱|개봉|뜯고|오우너|자랑', re.I)
 AVAILABLE_NOW = re.compile(r'재고\s*(?:가\s*)?(?:있|남)|(?:아직|지금|현재|계속)\s*(?:도\s*)?(?:살\s*수|구매\s*(?:가능|됨|된다)|결제\s*(?:가능|됨|된다)|주문\s*(?:가능|됨|된다)|판매\s*중|남아|남았|열려|풀려)|(?:구매|주문|결제)\s*가능|판매\s*중', re.I)
 CANCEL_OFFER = re.compile(r'취소\s*(?:할\s*(?:거|게|예정)|예정|합니다)|\d{1,2}[:시]\s*\d{0,2}.{0,12}취소', re.I)
-OFFER_NOTICE = re.compile(r'재입고|재판매|입고|풀렸|풀림|풀린|방금\s*뜬|취소분\s*(?:있|떴|풀)|응모|추첨|접수|예약\s*판매|판매|특가|핫딜|선착순|오픈|살놈|사라|주워가', re.I)
+OFFER_NOTICE = re.compile(r'재입고|재판매|입고|풀렸|풀림|풀린|방금\s*뜬|취소분\s*(?:있|떴|풀)|응모|추첨|접수|예약\s*판매|판매|특가|핫딜|선착순|오픈(?![가-힣a-z])|살놈|사라|주워가', re.I)
 OFFER_QUESTION = re.compile(r'어디서|어떻게|언제\s*(?:풀|입고|판매)|링크\s*(?:좀|주실|있나)|재고\s*(?:가\s*)?있(?:나|을까)|구매\s*가능(?:한가|한지|해\?)|응모함\?', re.I)
-ADVICE_QUESTION = re.compile(r'혜자(?:에|예|인)|가격.*(?:괜찮|적절)|(?:디스크|버전).*(?:아닌거|인거|없는거)|(?:뭐|어떤).*(?:나을|좋음|좋을)|(?:하나|두개|2개).*준다는', re.I)
+ADVICE_QUESTION = re.compile(r'혜자(?:에|예|인)|가격.*(?:괜찮|적절)|(?:디스크|버전).*(?:아닌거|인거|없는거)|(?:뭐|어떤).*(?:나을|좋음|좋을)|(?:하나|두개|2개).*준다는|(?:살|사볼|기다릴)까|(?:사도|구매해도)\s*(?:되|될)|(?:사야|구매해야)\s*(?:하|할|되)|어떰|어때|어떠냐', re.I)
+RESTOCK_RELAY = re.compile(r'(?:풀렸다는데|재입고\s*됐다는데|입고\s*됐다는데)\s*[?？]+\s*$', re.I)
 RECEIPT_IMAGE = re.compile(r'상품\s*준비\s*중|주문\s*(?:상세|취소|번호)|배송\s*조회|결제\s*완료', re.I)
 SPECULATION = re.compile(r'풀거\s*같|풀릴\s*듯|입고.*(?:같|예상)|밤\s*새야|풀렸으면', re.I)
 
@@ -200,18 +201,32 @@ def offer_basis(title, body, destination=None, image_text=''):
     text = title+' '+body
     # Inspect individual statements so a question or negative stock statement
     # cannot turn a personal purchase into an available offer.
-    statements = re.split(r'[\n.!?。]+', text)
+    # Preserve question punctuation and keep title/body separate: "구매 가능?"
+    # is not an affirmative availability report. An independent clear stock
+    # statement in the body may still support a post with a question title.
+    statements = [part.strip() for section in (title, body)
+                  for part in re.findall(r'[^\n.!?？。]+[.!?？。]*',
+                      re.sub(r'https?://[^\s<>]+', ' ', section))]
+    def question(part):
+        return bool(OFFER_QUESTION.search(part) or ADVICE_QUESTION.search(part)
+                    or re.search(r'[?？]|(?:있|없|되|하|가능한)(?:나요|냐|니|나)\s*$', part))
     available = any(AVAILABLE_NOW.search(part) and not NEGATIVE.search(part)
-                    and not CLOSED_TITLE.search(part) and not OFFER_QUESTION.search(part)
+                    and not CLOSED_TITLE.search(part) and not question(part)
                     and not re.search(r'있다고|있다길래|가능하다고|가능하다길래|(?:어제|그때|당시|예전에).*?(?:재고|가능)', part)
                     for part in statements)
     if available:
         return 'explicit current availability in post'
-    if CANCEL_OFFER.search(text):
+    if any(CANCEL_OFFER.search(part) and not question(part) for part in statements):
         return 'announced cancellation opportunity'
     if PURCHASE_STORY.search(text):
         return None
-    if OFFER_QUESTION.search(text) or ADVICE_QUESTION.search(text) or SPECULATION.search(text):
+    # A reported restock with concrete body details (e.g. the observed
+    # "쿠팡에 프로 풀렸다는데? / 듀센 2개 포함") is different from asking
+    # whether to buy or whether stock exists. Other questions cannot gain
+    # offer status just by containing a product link or shopping screenshot.
+    if (any(question(part) and not (RESTOCK_RELAY.search(part)
+            and not OFFER_QUESTION.search(part) and not ADVICE_QUESTION.search(part))
+            for part in statements) or SPECULATION.search(text)):
         return None
     if re.search(r'어제|지난|예전에|아까', text) and not REOPENED.search(text):
         return None
