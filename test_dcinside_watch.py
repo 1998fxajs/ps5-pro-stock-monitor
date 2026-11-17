@@ -28,14 +28,23 @@ class DCInsideTests(unittest.TestCase):
                 '<a href="/mgallery/board/view/?id=other&no=2">PS5 Pro 판매</a>')
         self.assertEqual(d.parse_posts(html, "hotdeal1", source), {})
 
-    def test_non_sale_post_not_alerted(self):
-        self.assertFalse(d.relevant("PS5 Pro 그래픽 성능 분석"))
-        self.assertFalse(d.relevant("PS5 Pro 중고 특가"))
-        self.assertFalse(d.relevant("PS5 Pro 울버린 세트 판매"))
+    def test_ps_gallery_posts_reach_body_review(self):
+        for title in ('쿠팡','링크','프로 풀렸다','이거','PS5 Pro 그래픽 성능 분석'):
+            self.assertTrue(d.relevant(title,'ps5'))
+
+    def test_comment_count_cannot_overwrite_title(self):
+        url='https://gall.dcinside.com/mgallery/board/lists/?id=ps5'
+        html='<a href="/mgallery/board/view/?id=ps5&no=728242">프로 풀렸다</a><a href="/mgallery/board/view/?id=ps5&no=728242&t=cv"><span>[5]</span></a>'
+        self.assertEqual(d.parse_posts(html,'ps5',url)['728242'][0],'프로 풀렸다')
+
+    def test_regular_board_url_is_not_doubled(self):
+        html='<a href="/board/view/?id=playstation&no=12">프로 링크</a>'
+        self.assertEqual(d.parse_posts(html,'playstation',d.GALLERIES[2][2])['12'][1],
+                         'https://gall.dcinside.com/board/view/?id=playstation&no=12')
 
     def test_coverage(self):
         self.assertEqual({x[1] for x in d.GALLERIES},
-                         {"hotdeal1", "discountproduct", "playstation"})
+                         {"hotdeal1", "discountproduct", "playstation", "ps5"})
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,62 @@
+{
+  "checked_at": "2026-11-17",
+  "notes": "Registered from public research. Sources can fail or index late. No claim of exhaustive internet coverage. Existing Gmarket/PlayShop direct stock exclusions retained.",
+  "discovery": [
+    {
+      "label": "일반 웹 검색: 플스",
+      "type": "rss",
+      "url": "https://www.bing.com/search?format=rss&q=%ED%94%8C%EC%8A%A4"
+    },
+    {
+      "label": "일반 웹 검색: PS5",
+      "type": "rss",
+      "url": "https://www.bing.com/search?format=rss&q=PS5"
+    },
+    {
+      "label": "일반 웹 검색: 플레이스테이션",
+      "type": "rss",
+      "url": "https://www.bing.com/search?format=rss&q=%ED%94%8C%EB%A0%88%EC%9D%B4%EC%8A%A4%ED%85%8C%EC%9D%B4%EC%85%98"
+    },
+    {
+      "label": "일반 웹 검색: 플스 프로",
+      "type": "rss",
+      "url": "https://www.bing.com/search?format=rss&q=%ED%94%8C%EC%8A%A4%20%ED%94%84%EB%A1%9C"
+    },
+    {
+      "label": "일반 웹 검색: PS5 Pro 쿠팡",
+      "type": "rss",
+      "url": "https://www.bing.com/search?format=rss&q=PS5%20Pro%20%EC%BF%A0%ED%8C%A1"
+    },
+    {
+      "label": "일반 웹 검색: 프로 재고 링크",
+      "type": "rss",
+      "url": "https://www.bing.com/search?format=rss&q=%ED%94%84%EB%A1%9C%20%EC%9E%AC%EA%B3%A0%20%EB%A7%81%ED%81%AC"
+    },
+    {
+      "label": "핫딜모음: 플스",
+      "type": "html",
+      "url": "https://hotdeal.zip/search/%ED%94%8C%EC%8A%A4"
+    },
+    {
+      "label": "핫딜모음: ps5",
+      "type": "html",
+      "url": "https://hotdeal.zip/search/ps5"
+    },
+    {
+      "label": "핫딜모음: ps5pro",
+      "type": "html",
+      "url": "https://hotdeal.zip/search/ps5pro"
+    }
+  ],
+  "purchase_links": [
+    {
+      "label": "11/16 쿠팡 프로 + 듀얼센스 제보 상품",
+      "url": "https://www.coupang.com/vp/products/9804453589?vendorItemId=96272680080",
+      "source": "https://hotdeal.zip/ps5-%ED%94%84%EB%A1%9C-%EB%93%80%EC%96%BC%EC%84%BC%EC%8A%A4-5e17",
+      "original_post": "https://www.fmkorea.com/10563649314",
+      "observed_price": 1399000,
+      "observed_configuration": "프로 + 듀얼센스",
+      "access_status": "HTTP 403; stock unverified"
+    }
+  ]
+}

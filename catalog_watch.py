@@ -63,6 +63,10 @@ STORE_LISTS = [
 MAX_ALERTS = 8
 
 def request(url, data=None, headers=None, method=None):
+    if not monitor_window.is_active_at() and not url.startswith('https://api.github.com/'):
+        raise RuntimeError('Monitoring window ended')
+    # Actual GetThese category URLs contain emoji/Korean path segments.
+    url = urllib.parse.quote(url, safe=':/?&=%#+')
     h = {
         "User-Agent": "Mozilla/5.0 (compatible; PS5ProCatalogWatch/1.0)",
         "Accept": "text/html,application/json",
@@ -188,6 +192,7 @@ def main():
     changed = False
     discovered = 0
     alerts = []
+    successful_sources = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         tasks = {pool.submit(request, src["url"]): src for src in STORE_LISTS}
         for future in concurrent.futures.as_completed(tasks):
@@ -236,6 +241,7 @@ def main():
                 print(f"NO VERIFIED PRODUCT LINKS {src['name']}: page accessible but no matching PS5 Pro listings; do not claim full listing coverage")
                 continue
             print(f"{src['name']}: {len(matches)} matching links")
+            successful_sources += 1
             # First successful scan establishes baseline. Existing product
             # pages are covered separately by the direct stock monitor.
             old = state.get(src["id"])
@@ -264,6 +270,8 @@ def main():
     if changed:
         save(state, sha)
     print(f"Catalog discovery complete; new URLs={discovered}, sources={len(STORE_LISTS)}")
+    if not successful_sources:
+        raise RuntimeError('No catalogs returned recognizable product links')
 
 if __name__ == "__main__":
     main()

@@ -5,8 +5,10 @@ Lead alerts are NOT confirmed inventory. Google News RSS is a best-effort
 public discovery source and can be delayed, incomplete, or rate limited.
 """
 import base64
+import concurrent.futures
 import monitor_window
 import sale_link_review
+from notifications import telegram
 import email.utils
 import hashlib
 import json
@@ -28,6 +30,9 @@ INITIAL_AGE_MINUTES = 30
 # Distinct aliases are intentionally split across queries. Marketplace promotions
 # may not be indexed by Google News; this is discovery, not direct stock checking.
 FEEDS = [
+    ("넓은 플스 검색", '플스'),
+    ("넓은 PS5 검색", 'PS5'),
+    ("넓은 플레이스테이션 검색", '플레이스테이션'),
     ("영문명 판매·재입고", '("PS5 Pro" OR "PlayStation 5 Pro") (판매 OR 재입고 OR 입고 OR 추첨 OR 응모 OR 구매)'),
     ("국문 PS5프로", '("PS5 프로" OR "PS5프로") (판매 OR 재고 OR 특가 OR 재입고 OR 선착순 OR 예약판매)'),
     ("플레이스테이션5 프로", '("플레이스테이션5 프로" OR "플레이스테이션 5 프로" OR "플레이스테이션5프로") (판매 OR 입고 OR 추첨 OR 프로모션)'),
@@ -67,6 +72,8 @@ EXCLUDE = re.compile(
 SIGNAL = re.compile(r"판매|재고|입고|구매|추첨|응모|핫딜|특가|할인|프로모션|순차출고|오픈|물량|한정수량|선착순|픽업|예약|래플|드롭|특판|구입가능|공구|풀림|풀렸|풀렸다|풀렸네|풀린|떴다|떴네|떳다|뜸|열렸다|열림|올라왔|로켓배송|정가판매", re.I)
 
 def request(url, data=None, headers=None, method=None):
+    if not monitor_window.is_active_at() and not url.startswith('https://api.github.com/'):
+        raise RuntimeError('Monitoring window ended')
     h = {"User-Agent": "Mozilla/5.0 (compatible; PS5ProPromoWatch/1.0)",
          "Accept": "application/rss+xml,application/json,text/xml"}
     h.update(headers or {})
@@ -99,18 +106,6 @@ def save_state(state, sha):
         data["sha"] = sha
     github(f"contents/{STATE_FILE}", data)
 
-def telegram(message):
-    token = os.environ.get("TELEGRAM_BOT_TOKEN")
-    chat = os.environ.get("TELEGRAM_CHAT_ID")
-    if not token or not chat:
-        raise RuntimeError("Telegram secrets missing")
-    data = urllib.parse.urlencode({"chat_id": chat, "text": message,
-                                   "disable_web_page_preview": "true"}).encode()
-    result = json.loads(request(f"https://api.telegram.org/bot{token}/sendMessage", data,
-                                {"Content-Type": "application/x-www-form-urlencoded"}))
-    if result.get("ok") is not True:
-        raise RuntimeError("Telegram did not confirm delivery")
-
 def read_feed(label, query):
     url = "https://news.google.com/rss/search?" + urllib.parse.urlencode(
         {"q": query, "hl": "ko", "gl": "KR", "ceid": "KR:ko"})
@@ -127,8 +122,6 @@ def read_feed(label, query):
             published = email.utils.parsedate_to_datetime(raw_pub).astimezone(UTC)
         except (ValueError, TypeError, IndexError):
             continue
-        if not INCLUDE.search(title) or EXCLUDE.search(title) or not SIGNAL.search(title):
-            continue
         count += 1
         yield {"title": title, "link": link, "published": published, "source": label,
                "description": item.findtext("description", default="") or ""}
@@ -144,7 +137,9 @@ def read_community_rss(label, url):
         raw_pub = (item.findtext("pubDate", default="") or "").strip()
         if not title or not link or not raw_pub:
             continue
-        if not INCLUDE.search(title) or EXCLUDE.search(title) or not SIGNAL.search(title):
+        description = item.findtext('description', default='') or ''
+        if not (sale_link_review.PLATFORM.search(title+' '+description)
+                or sale_link_review.COMMUNITY_CUES.search(title+' '+description)):
             continue
         try:
             published = email.utils.parsedate_to_datetime(raw_pub).astimezone(UTC)
@@ -163,20 +158,22 @@ def main():
     state, sha = load_state()
     seen = set(state.get("seen", []))
     first_run = sha is None
-    threshold = datetime.now(UTC) - timedelta(
-        minutes=INITIAL_AGE_MINUTES if first_run else MAX_AGE_HOURS)
+    threshold = datetime.now(UTC) - (timedelta(minutes=INITIAL_AGE_MINUTES)
+                                   if first_run else timedelta(hours=MAX_AGE_HOURS))
     items = {}
     failures = 0
-    for label, query in FEEDS:
-        try:
-            for item in read_feed(label, query):
-                if item["published"] >= threshold:
-                    key = hashlib.sha256(item["link"].encode()).hexdigest()[:24]
-                    if key not in seen:
-                        items[key] = item
-        except Exception as exc:
-            failures += 1
-            print(f"Feed {label} unavailable: {type(exc).__name__}: {exc}", file=sys.stderr)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+        tasks = {pool.submit(lambda l,q:list(read_feed(l,q)),label,query):label for label,query in FEEDS}
+        for future in concurrent.futures.as_completed(tasks):
+            try:
+                for item in future.result():
+                    if item['published'] >= threshold:
+                        key = hashlib.sha256(item['link'].encode()).hexdigest()[:24]
+                        if key not in seen:
+                            items[key] = item
+            except Exception as exc:
+                failures += 1
+                print(f'Feed {tasks[future]} unavailable: {type(exc).__name__}', file=sys.stderr)
     community_failures = 0
     for label, url in COMMUNITY_RSS:
         try:
@@ -192,25 +189,34 @@ def main():
         raise RuntimeError("All public discovery feeds failed; no coverage")
 
     count = 0
-    for key, item in sorted(items.items(), key=lambda kv: kv[1]["published"]):
+    delivery_failures = []
+    processed = []
+    for key, item in sorted(items.items(), key=lambda kv: kv[1]["published"], reverse=True)[:24]:
         # Review source body and candidate product/raffle URLs; don't present
         # a Google News wrapper as the purchase link when a direct link exists.
         lead = sale_link_review.inspect(
             item["title"], item["link"], item.get("description", ""))
         if lead is not None:
-            telegram(sale_link_review.format_alert(
-                lead, item["source"], item["published"]))
+            try:
+                telegram(sale_link_review.format_alert(lead, item['source'], item['published']))
+            except Exception as exc:
+                delivery_failures.append(key)
+                print(f'Delivery failed; retaining candidate: {type(exc).__name__}')
+                continue
             count += 1
         else:
             print(f"Rejected stale/closed/irrelevant sale post: {item['title'][:140]}")
         seen.add(key)
+        processed.append(key)
     # Avoid a needless GitHub commit on every 5-minute scan when nothing
     # has changed. Create baseline once, then save only on new alerts.
-    if count or sha is None:
-        state["seen"] = sorted(seen)[-1500:]
+    if processed or sha is None:
+        state["seen"] = list(dict.fromkeys(state.get('seen',[])+processed))[-3000:]
         state["updated_at"] = datetime.now(UTC).isoformat()
         save_state(state, sha)
     print(f"Promo discovery complete; delivered {count} new lead alert(s); failed Google News feeds: {failures}; failed community feeds: {community_failures}")
+    if delivery_failures:
+        raise RuntimeError('Telegram delivery failed for '+str(len(delivery_failures))+' candidates')
 
 if __name__ == "__main__":
     main()

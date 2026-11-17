@@ -11,6 +11,11 @@ on:
       - retail_watch.py
       - watch_loop.py
       - monitor_window.py
+      - notifications.py
+      - community_language.json
+      - source_registry.json
+      - web_discovery.py
+      - test_incident_regressions.py
       - test_retail_watch.py
       - test_watch_loop.py
       - .github/workflows/retail-watch.yml
@@ -19,13 +24,15 @@ permissions:
   actions: write
 concurrency:
   group: ps5-pro-retail-check
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
 jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 155
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - name: Check monitoring deadline (Nov 19 KST)
         id: window
         run: python3 monitor_window.py
@@ -34,7 +41,7 @@ jobs:
           WORKFLOW_FILENAME: retail-watch.yml
       - name: Run stock and loop tests
         if: steps.window.outputs.active == 'true'
-        run: python3 -m unittest test_retail_watch.py test_watch_loop.py -v
+        run: python3 -m unittest discover -v
       - name: Poll retailers every five minutes while runner is active
         if: steps.window.outputs.active == 'true'
         run: python3 -u watch_loop.py retail --duration-minutes "$DURATION_MINUTES"

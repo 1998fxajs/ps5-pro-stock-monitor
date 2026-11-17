@@ -2,10 +2,11 @@
 import unittest
 import retail_watch as m
 
-GAME = m.STORES[0]
-SSG = m.STORES[1]
-COMPUZONE = m.STORES[2]
-GETTHESE = m.STORES[3]
+STORES = {s['id']:s for s in m.STORES}
+GAME = STORES['gamewoori']
+SSG = STORES['ssg_emart']
+COMPUZONE = STORES['compuzone']
+GETTHESE = STORES['getthese']
 
 def page(title, mark="", offers=""):
     return f"<html><head><title>{title}</title>{offers}</head><body><h1>{title} {mark}</h1></body></html>"

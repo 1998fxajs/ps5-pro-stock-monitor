@@ -5,6 +5,7 @@ Official published registration opening and a new registration round both
 notify on the same check. Excludes bundled offers by block and price.
 """
 import base64
+from notifications import telegram as alert
 import json
 import os
 import re
@@ -124,18 +125,6 @@ def store(state,sha):
     if sha:
         payload["sha"]=sha
     gh(f"contents/{STATE_FILE}",payload)
-
-def alert(message):
-    from urllib.parse import urlencode
-    token=os.environ["TELEGRAM_BOT_TOKEN"]
-    chat=os.environ["TELEGRAM_CHAT_ID"]
-    data=urlencode({"chat_id":chat,"text":message,"disable_web_page_preview":"true"}).encode()
-    req=urllib.request.Request(f"https://api.telegram.org/bot{token}/sendMessage",data=data,
-        headers={"Content-Type":"application/x-www-form-urlencoded"},method="POST")
-    with urllib.request.urlopen(req,timeout=16) as response:
-        result=json.load(response)
-    if not result.get("ok"):
-        raise RuntimeError("Telegram did not accept raffle notification")
 
 def main():
     if not monitor_window.is_active_at():

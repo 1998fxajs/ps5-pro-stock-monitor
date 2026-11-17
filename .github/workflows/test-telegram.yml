@@ -1,33 +1,31 @@
 name: Test Telegram notification
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/test-telegram.yml
+      - live_validation.py
 permissions:
   contents: read
 jobs:
   send-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 5
     steps:
-      - name: Send test notification
+      - uses: actions/checkout@v4
+      - name: Test parsers and notification failure handling
+        run: python3 -m unittest discover -v
+      - name: Verify public sources and send labelled historical replay
+        run: python3 -u live_validation.py
         env:
+          SEND_TEST_ALERT: '1'
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: |
-          python3 - <<'PY'
-          import json, os, urllib.parse, urllib.request
-          token=os.environ.get("TELEGRAM_BOT_TOKEN","")
-          chat=os.environ.get("TELEGRAM_CHAT_ID","")
-          if not token or not chat:
-              raise SystemExit("Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID")
-          data=urllib.parse.urlencode({
-              "chat_id":chat,
-              "text":"[테스트] PS5 Pro 재고 감시 알림 연결 확인. 실제 재고 발견 알림이 아닙니다."
-          }).encode()
-          request=urllib.request.Request(
-              f"https://api.telegram.org/bot{token}/sendMessage",data=data,method="POST")
-          with urllib.request.urlopen(request, timeout=20) as res:
-              result=json.load(res)
-          if not result.get("ok"):
-              raise SystemExit("Telegram API did not confirm delivery")
-          print("Telegram API accepted test message")
-          PY
+      - name: Retain live validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-validation
+          path: validation-summary.json
+          if-no-files-found: warn

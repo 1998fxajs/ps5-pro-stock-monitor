@@ -1,0 +1,148 @@
+{
+  "note": "Actual public PS5 gallery posts inspected 2026-11-17; terms are evidence cues, never a prerequisite to opening PS gallery posts. 링크 is also a user-requested cue.",
+  "observed_terms": [
+    "프로",
+    "풀림",
+    "풀렸",
+    "풀린",
+    "뜬",
+    "떴다",
+    "취소분",
+    "샀다",
+    "샀는데",
+    "프로샀다",
+    "구매함",
+    "구매했",
+    "살놈",
+    "사라",
+    "ㄱㄱ",
+    "입고",
+    "물량",
+    "상품페이지",
+    "인질셋",
+    "듀센",
+    "취소할",
+    "주워가",
+    "먹었다",
+    "정가",
+    "응모",
+    "링크"
+  ],
+  "user_requested_link_terms": [
+    "링크",
+    "주소",
+    "좌표",
+    "url"
+  ],
+  "sources": [
+    {
+      "id": "728239",
+      "terms": [
+        "풀림",
+        "살놈",
+        "사라",
+        "ㄱㄱ",
+        "정가"
+      ],
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728239"
+    },
+    {
+      "id": "728242",
+      "terms": [
+        "프로",
+        "풀렸"
+      ],
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728242"
+    },
+    {
+      "id": "728250",
+      "terms": [
+        "풀린"
+      ],
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728250"
+    },
+    {
+      "id": "728331",
+      "terms": [
+        "뜬",
+        "물량",
+        "먹었다"
+      ],
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728331"
+    },
+    {
+      "id": "728339",
+      "terms": [
+        "취소분",
+        "샀다"
+      ],
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728339"
+    },
+    {
+      "id": "728335",
+      "terms": [
+        "상품페이지"
+      ],
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728335"
+    },
+    {
+      "id": "728336",
+      "terms": [
+        "취소할",
+        "주워가"
+      ],
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728336"
+    },
+    {
+      "id": "728370",
+      "terms": [
+        "인질셋",
+        "듀센"
+      ],
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728370"
+    },
+    {
+      "id": "728073",
+      "terms": [
+        "응모",
+        "떴다"
+      ],
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728073"
+    },
+    {
+      "id": "728246",
+      "terms": [
+        "구매함"
+      ],
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728246"
+    },
+    {
+      "id": "728265",
+      "terms": [
+        "구매했"
+      ],
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728265"
+    },
+    {
+      "id": "728332",
+      "terms": [
+        "프로샀다"
+      ],
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728332"
+    },
+    {
+      "id": "728367",
+      "terms": [
+        "샀는데"
+      ],
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728367"
+    },
+    {
+      "id": "728256",
+      "terms": [
+        "입고"
+      ],
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=728256"
+    }
+  ]
+}

@@ -5,6 +5,7 @@ GitHub cron may start late, but once this job begins it runs repeated checks
 without waiting for another scheduled workflow. No login or purchase actions.
 """
 import argparse
+import concurrent.futures
 import subprocess
 import sys
 import time
@@ -15,7 +16,7 @@ INTERVAL_SECONDS = 300
 DEFAULT_DURATION_MINUTES = 140
 COMMANDS = {
     "retail": ("retail_watch.py",),
-    "promo": ("promo_watch.py", "catalog_watch.py", "dcinside_watch.py"),
+    "promo": ("dcinside_watch.py", "web_discovery.py", "promo_watch.py", "catalog_watch.py"),
 }
 
 
@@ -29,16 +30,20 @@ def next_tick(start, now, interval=INTERVAL_SECONDS):
 def check_once(mode, runner=subprocess.run):
     """Run each independent monitor; preserve partial coverage on failure."""
     failed = []
-    for script in COMMANDS[mode]:
+    def check_script(script):
         print(f"[watch] Running {script}", flush=True)
         try:
             result = runner([sys.executable, "-u", script], timeout=210, check=False)
             if result.returncode != 0:
-                failed.append(f"{script} exit={result.returncode}")
+                return f"{script} exit={result.returncode}"
         except subprocess.TimeoutExpired:
-            failed.append(f"{script} timeout after 210s")
+            return f"{script} timeout after 210s"
         except Exception as exc:
-            failed.append(f"{script} {type(exc).__name__}: {exc}")
+            return f"{script} {type(exc).__name__}"
+        return None
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(COMMANDS[mode])) as pool:
+        for error in pool.map(check_script,COMMANDS[mode]):
+            if error:failed.append(error)
     return failed
 
 
@@ -69,7 +74,7 @@ def run(mode, duration_minutes=DEFAULT_DURATION_MINUTES, interval_seconds=INTERV
     print(f"[watch] Finished {count} cycles; cycles with failures={failed_rounds}", flush=True)
     # Workflow should be red when checks entirely fail repeatedly, rather than
     # claiming everything worked. Partial failures remain logged as such.
-    return 1 if count and failed_rounds == count else 0
+    return 1 if failed_rounds else 0
 
 
 def main():

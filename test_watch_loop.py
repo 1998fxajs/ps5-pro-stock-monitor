@@ -14,8 +14,8 @@ class RunnerLoopTests(unittest.TestCase):
 
     def test_contains_both_modes(self):
         self.assertEqual(w.COMMANDS["retail"], ("retail_watch.py",))
-        self.assertEqual(w.COMMANDS["promo"],
-                         ("promo_watch.py", "catalog_watch.py", "dcinside_watch.py"))
+        self.assertEqual(set(w.COMMANDS['promo']),
+                         {'promo_watch.py','catalog_watch.py','dcinside_watch.py','web_discovery.py'})
 
     def test_retail_single_pass(self):
         calls = []
@@ -31,7 +31,7 @@ class RunnerLoopTests(unittest.TestCase):
             calls.append(argv[-1])
             return subprocess.CompletedProcess(argv, 1 if "catalog" in argv[-1] else 0)
         self.assertEqual(len(w.check_once("promo", fake_runner)), 1)
-        self.assertEqual(calls, ["promo_watch.py", "catalog_watch.py", "dcinside_watch.py"])
+        self.assertEqual(set(calls),set(w.COMMANDS['promo']))
 
 
 if __name__ == "__main__":

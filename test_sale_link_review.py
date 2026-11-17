@@ -30,8 +30,9 @@ class SaleLinkTests(unittest.TestCase):
         html = "<p>응모 종료일시: 2026.11.15 23:59</p>"
         self.assertIsNone(s.review("PS5 Pro 추첨 접수", "https://example.com/a",html,now=NOW))
 
-    def test_reject_over_budget_in_title(self):
-        self.assertIsNone(s.review("PS5 Pro 콘솔 판매 1,480,000원", "https://example.com/a",now=NOW))
+    def test_over_budget_is_an_information_alert(self):
+        lead=s.review("PS5 Pro 콘솔 판매 1,480,000원", "https://example.com/a",now=NOW)
+        self.assertTrue(any('희망가격 초과' in w for w in lead['warnings']))
 
     def test_news_only_remains_unverified(self):
         lead = s.review("PS5 Pro 2TB 정가 재입고", "https://news.google.com/rss/articles/XYZ", now=NOW)
@@ -53,9 +54,9 @@ class SaleLinkTests(unittest.TestCase):
         ]
         self.assertTrue(all(not s.safe_public_url(u) for u in bad))
 
-    def test_reject_bundle_and_resale_headline(self):
+    def test_bundle_and_resale_are_labelled_not_hidden(self):
         for title in ("PS5 Pro 울버린 특전 세트 판매", "PS5 Pro 중고 특가"):
-            self.assertIsNone(s.review(title,"https://example.com/a",now=NOW))
+            self.assertTrue(s.review(title,"https://example.com/a",now=NOW)['warnings'])
 
     def test_news_link_with_official_specific_product_dominates(self):
         html = """

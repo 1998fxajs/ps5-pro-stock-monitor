@@ -6,6 +6,7 @@ A 'candidate' alert is only an indication that a product-specific sold-out
 marker disappeared; it is NOT confirmed available stock.
 """
 import base64
+from notifications import telegram
 import monitor_window
 import concurrent.futures
 import json
@@ -22,6 +23,13 @@ from urllib.parse import urlencode
 STATE = "retail_state.json"
 PRICE_CEILING = 1_298_000
 STORES = [
+    {
+        "id": "coupang_reported",
+        "name": "쿠팡 (커뮤니티에서 발견한 프로 + 듀얼센스 상품)",
+        "url": "https://www.coupang.com/vp/products/9804453589?vendorItemId=96272680080",
+        "type": "generic",
+        "title": r"(?:플레이스테이션\s*5\s*프로|PS\s*5\s*Pro)",
+    },
     {
         "id": "gamewoori",
         "name": "겜우리 (인증판매점)",
@@ -58,6 +66,8 @@ STORES = [
 ]
 
 def fetch(url, data=None, headers=None, method=None):
+    if not monitor_window.is_active_at() and not url.startswith('https://api.github.com/'):
+        raise RuntimeError('Monitoring window ended')
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; PS5ProWatch/1.0; public retail page)",
         "Accept": "text/html,application/json",
@@ -240,18 +250,6 @@ def save_state(data, sha):
         payload["sha"] = sha
     gh(f"contents/{STATE}", payload)
 
-def telegram(message):
-    bot = os.environ.get("TELEGRAM_BOT_TOKEN")
-    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
-    if not bot or not chat_id:
-        raise RuntimeError("Telegram secrets missing")
-    data = urlencode({"chat_id": chat_id, "text": message, "disable_web_page_preview": "true"}).encode()
-    response = json.loads(fetch(
-        f"https://api.telegram.org/bot{bot}/sendMessage", data,
-        {"Content-Type": "application/x-www-form-urlencoded"}))
-    if not response.get("ok"):
-        raise RuntimeError("Telegram did not confirm delivery")
-
 def main():
     if not monitor_window.is_active_at():
         print("Watch ended at 2026-11-19 23:59 KST; no retailer checks or Telegram alerts")
@@ -305,8 +303,8 @@ def main():
             )
         elif current == "access_denied" and previous != "access_denied":
             telegram(
-                "[PS5 Pro 감시 장애 - 접근 제한 가능성]\\n"
-                f"{site['name']}\\n{site['url']}\\n"
+                "[PS5 Pro 감시 장애 - 접근 제한 가능성]\n"
+                f"{site['name']}\n{site['url']}\n"
                 "GitHub 실행 환경에서 사이트가 401/403/429를 반환했습니다. "
                 "재고 없음이 아니라 직접 확인 불가입니다. "
                 "공개 판매글 탐색은 별도 실행됩니다."

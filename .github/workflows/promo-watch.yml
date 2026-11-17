@@ -14,6 +14,11 @@ on:
       - dcinside_watch.py
       - watch_loop.py
       - monitor_window.py
+      - notifications.py
+      - community_language.json
+      - source_registry.json
+      - web_discovery.py
+      - test_incident_regressions.py
       - test_promo_watch.py
       - test_catalog_watch.py
       - test_dcinside_watch.py
@@ -24,13 +29,15 @@ permissions:
   actions: write
 concurrency:
   group: ps5-pro-promo-watch
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
 jobs:
   discover:
     runs-on: ubuntu-latest
     timeout-minutes: 155
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - name: Check monitoring deadline (Nov 19 KST)
         id: window
         run: python3 monitor_window.py
@@ -39,7 +46,7 @@ jobs:
           WORKFLOW_FILENAME: promo-watch.yml
       - name: Verify announcement, listing, DC, and loop parsers
         if: steps.window.outputs.active == 'true'
-        run: python3 -m unittest test_promo_watch.py test_catalog_watch.py test_dcinside_watch.py test_watch_loop.py test_sale_link_review.py -v
+        run: python3 -m unittest discover -v
       - name: Poll new sale posts and product listings every five minutes
         if: steps.window.outputs.active == 'true'
         run: python3 -u watch_loop.py promo --duration-minutes "$DURATION_MINUTES"
