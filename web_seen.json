@@ -35,9 +35,9 @@
     "a11e0d80ca4e0e97dff31eb3"
   ],
   "last_scan": {
-    "at": "2026-11-17T16:02:45.919882+09:00",
-    "sources_ok": 1,
-    "sources_failed": 8,
+    "at": "2026-11-17T16:07:45.934262+09:00",
+    "sources_ok": 2,
+    "sources_failed": 7,
     "results": 1,
     "alerts": 0,
     "deferred": 0,
