@@ -34,12 +34,13 @@
     "89626010694974d1429f09db"
   ],
   "last_scan": {
-    "at": "2026-11-17T13:48:47.505399+09:00",
-    "sources_ok": 6,
-    "sources_failed": 3,
-    "results": 51,
-    "alerts": 4,
-    "deferred": 19,
+    "at": "2026-11-17T14:12:43.769100+09:00",
+    "sources_ok": 2,
+    "sources_failed": 7,
+    "results": 1,
+    "alerts": 0,
+    "deferred": 0,
+    "pending_body": 1,
     "failed_alerts": 0
   }
 }
