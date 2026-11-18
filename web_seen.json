@@ -46,13 +46,13 @@
     "610792cd5925dd97c2863f62"
   ],
   "last_scan": {
-    "at": "2026-11-18T18:19:47.749234+09:00",
+    "at": "2026-11-18T18:25:11.487675+09:00",
     "sources_ok": 2,
     "sources_failed": 7,
-    "results": 2,
+    "results": 1,
     "alerts": 0,
     "deferred": 0,
-    "pending_body": 2,
+    "pending_body": 1,
     "failed_alerts": 0
   }
 }
