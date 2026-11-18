@@ -3,28 +3,28 @@
     "status": "out_of_stock",
     "reason": "SSG sellStatCd=80",
     "checked_url": "https://emart.ssg.com/item/itemDtl.ssg?itemId=1000619325394",
-    "checked_at": "2026-11-18T20:06:31.510895+00:00"
+    "checked_at": "2026-11-18T20:11:31.359486+00:00"
   },
   "gamewoori": {
     "status": "out_of_stock",
     "reason": "product-heading sold out badge",
     "http_status": 200,
     "checked_url": "https://www.gamewoori.com/product/detail.html?product_no=16602",
-    "checked_at": "2026-11-18T20:06:31.510960+00:00"
+    "checked_at": "2026-11-18T20:11:31.359466+00:00"
   },
   "compuzone": {
     "status": "unknown",
     "reason": "no validated explicit product-level in-stock signal",
     "http_status": 200,
     "checked_url": "https://www.compuzone.co.kr/product/product_detail.htm?ProductNo=1315525",
-    "checked_at": "2026-11-18T20:06:31.511016+00:00"
+    "checked_at": "2026-11-18T20:11:31.359573+00:00"
   },
   "getthese": {
     "status": "out_of_stock",
     "reason": "structured offer says out of stock",
     "http_status": 200,
     "checked_url": "https://get-these.com/product/ps5-pro-%EC%BD%98%EC%86%94-2tb-%EC%88%9C%EC%B0%A8%EC%B6%9C%EA%B3%A0/426/category/23/display/1/",
-    "checked_at": "2026-11-18T20:06:31.510988+00:00"
+    "checked_at": "2026-11-18T20:11:31.359551+00:00"
   },
   "gmarket_playshop": {
     "product_name": "PS5 Pro 콘솔 2TB (추첨응모-상세페이지 확인)",
@@ -36,14 +36,14 @@
     "reason": "primary goods.IsOutOfStock=true",
     "http_status": 200,
     "checked_url": "https://item.gmarket.co.kr/Item?goodscode=4146068876",
-    "checked_at": "2026-11-18T20:06:31.510930+00:00"
+    "checked_at": "2026-11-18T20:11:31.359508+00:00"
   },
   "coupang_reported": {
     "status": "access_denied",
     "http_status": 403,
     "reason": "public HTTP request returned 403; direct stock check unavailable",
     "checked_url": "https://www.coupang.com/vp/products/9804453589?vendorItemId=96272680080",
-    "checked_at": "2026-11-18T20:06:31.510780+00:00"
+    "checked_at": "2026-11-18T20:11:31.359383+00:00"
   },
   "naver_playshop": {
     "product_name": "[PS5] 플레이스테이션 5 프로 콘솔 - 2TB",
@@ -56,10 +56,10 @@
     "http_status": 200,
     "checked_url": "https://brand.naver.com/playshop/products/10897976014",
     "direct_status": "out_of_stock",
-    "checked_at": "2026-11-18T20:06:31.510859+00:00"
+    "checked_at": "2026-11-18T20:11:31.359438+00:00"
   },
   "_last_scan": {
-    "checked_at": "2026-11-18T20:06:31.511022+00:00",
+    "checked_at": "2026-11-18T20:11:31.359577+00:00",
     "stores_checked": 7
   }
 }
