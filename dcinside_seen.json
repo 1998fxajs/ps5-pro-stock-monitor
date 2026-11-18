@@ -2209,6 +2209,29 @@
     "730432",
     "730434",
     "730435",
-    "730433"
+    "730433",
+    "730454",
+    "730455",
+    "730453",
+    "730452",
+    "730449",
+    "730450",
+    "730448",
+    "730451",
+    "730445",
+    "730447",
+    "730446",
+    "730444"
+  ],
+  "_alerts": [
+    {
+      "board": "ps5",
+      "post_id": "730447",
+      "title": "gta6 노말단 1시간 후기",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=730447",
+      "decision_basis": "sale/restock/entry announcement; console identified",
+      "message_id": 40,
+      "date": 1795018562
+    }
   ]
 }
