@@ -2671,7 +2671,12 @@
     "730908",
     "730906",
     "730903",
-    "730904"
+    "730904",
+    "730911",
+    "730913",
+    "730910",
+    "730912",
+    "730909"
   ],
   "_alerts": [
     {
@@ -2682,6 +2687,15 @@
       "decision_basis": "sale/restock/entry announcement; console identified",
       "message_id": 40,
       "date": 1795018562
+    },
+    {
+      "board": "ps5",
+      "post_id": "730909",
+      "title": "프로 응모 진짜되면 나 바로산다",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=730909",
+      "decision_basis": "sale/restock/entry announcement; console identified",
+      "message_id": 41,
+      "date": 1795050539
     }
   ]
 }
