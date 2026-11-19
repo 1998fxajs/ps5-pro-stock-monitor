@@ -1,0 +1,66 @@
+name: Stop all PS5 Pro notifications
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/stop-notifications.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: write
+jobs:
+  stop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Disable workflows and cancel every other active run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json, os, time
+          from urllib.request import Request, urlopen
+          from urllib.error import HTTPError
+          repo = os.environ['GITHUB_REPOSITORY']
+          own_run = int(os.environ['GITHUB_RUN_ID'])
+          workflows = ['promo-watch.yml', 'retail-watch.yml', 'raffle-watch.yml',
+                       'test-telegram.yml', 'replay-historical-posts.yml',
+                       'validate-marketplaces.yml', 'validate-discovery.yml']
+          def api(path, method='GET'):
+              request = Request('https://api.github.com/repos/'+repo+'/'+path,
+                  method=method, headers={
+                    'Authorization': 'Bearer '+os.environ['GITHUB_TOKEN'],
+                    'Accept': 'application/vnd.github+json',
+                    'X-GitHub-Api-Version': '2022-11-28'})
+              with urlopen(request, timeout=20) as response:
+                  data = response.read()
+                  return json.loads(data) if data else {}
+          errors = []
+          for workflow in workflows:
+              try:
+                  api('actions/workflows/'+workflow+'/disable', 'PUT')
+                  print('Disabled '+workflow, flush=True)
+              except HTTPError as exc:
+                  errors.append(workflow+': HTTP '+str(exc.code))
+          def active_runs():
+              return [run for run in api('actions/runs?per_page=100')['workflow_runs']
+                      if run['id'] != own_run and run['status'] != 'completed']
+          for attempt in range(5):
+              active = active_runs()
+              if not active:
+                  break
+              for run in active:
+                  try:
+                      endpoint = 'force-cancel' if attempt >= 3 else 'cancel'
+                      api('actions/runs/'+str(run['id'])+'/'+endpoint, 'POST')
+                      print(endpoint+' '+str(run['id'])+' '+run['name'], flush=True)
+                  except HTTPError as exc:
+                      print('Cancel status '+str(run['id'])+': HTTP '+str(exc.code), flush=True)
+              time.sleep(5)
+          remaining = active_runs()
+          states = {name: api('actions/workflows/'+name)['state'] for name in workflows}
+          api('actions/workflows/stop-notifications.yml/disable', 'PUT')
+          print('SHUTDOWN SUMMARY '+json.dumps({'workflows':states,
+              'remaining_active_runs':[r['id'] for r in remaining], 'errors':errors}), flush=True)
+          if errors or remaining or any(state != 'disabled_manually' for state in states.values()):
+              raise RuntimeError('Shutdown needs verification')
+          PY

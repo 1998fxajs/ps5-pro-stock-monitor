@@ -9,10 +9,12 @@ from urllib.error import HTTPError
 
 KST = ZoneInfo("Asia/Seoul")
 END_EXCLUSIVE = datetime(2026, 11, 20, 0, 0, tzinfo=KST)
+# User explicitly stopped all monitoring and Telegram alerts on 2026-11-19.
+MONITORING_ENABLED = False
 
 def is_active_at(now=None):
     now = now or datetime.now(KST)
-    return now.astimezone(KST) < END_EXCLUSIVE
+    return MONITORING_ENABLED and now.astimezone(KST) < END_EXCLUSIVE
 
 def disable_own_workflow():
     """Best-effort GitHub disable to stop scheduled runs after cutoff."""
