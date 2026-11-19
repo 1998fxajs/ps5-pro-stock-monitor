@@ -43,16 +43,21 @@
     "df3ba15295c5e4dcd63bdeb2",
     "ff80da21d5b3006505d47694",
     "c9f8f34160d4fb2cb58f761b",
-    "610792cd5925dd97c2863f62"
+    "610792cd5925dd97c2863f62",
+    "38eaeb0da2708950d673eb6a",
+    "72a83aa1434d6bad5ca74b1e",
+    "75676a69ef03595c859b3cec",
+    "04293c8361c850f3b04bf393",
+    "9cd8b87fdc3d8b1a09b5090a"
   ],
   "last_scan": {
-    "at": "2026-11-19T10:43:50.043143+09:00",
-    "sources_ok": 2,
-    "sources_failed": 7,
-    "results": 1,
+    "at": "2026-11-19T10:49:11.209755+09:00",
+    "sources_ok": 3,
+    "sources_failed": 6,
+    "results": 10,
     "alerts": 0,
     "deferred": 0,
-    "pending_body": 1,
-    "failed_alerts": 0
+    "pending_body": 4,
+    "failed_alerts": 1
   }
 }
