@@ -53,13 +53,13 @@
     "ef41abb8b0dabd438f508e58"
   ],
   "last_scan": {
-    "at": "2026-11-19T12:09:05.248084+09:00",
-    "sources_ok": 3,
-    "sources_failed": 6,
-    "results": 11,
+    "at": "2026-11-19T12:14:04.936462+09:00",
+    "sources_ok": 2,
+    "sources_failed": 7,
+    "results": 1,
     "alerts": 0,
     "deferred": 0,
-    "pending_body": 9,
+    "pending_body": 1,
     "failed_alerts": 0
   }
 }
