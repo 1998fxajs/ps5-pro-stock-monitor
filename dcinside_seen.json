@@ -171,7 +171,8 @@
     "10705",
     "10706",
     "10708",
-    "10707"
+    "10707",
+    "10697"
   ],
   "discountproduct": [
     "2826",
@@ -3221,7 +3222,13 @@
     "731444",
     "731445",
     "731446",
-    "731443"
+    "731443",
+    "731452",
+    "731453",
+    "731450",
+    "731451",
+    "731449",
+    "731448"
   ],
   "_alerts": [
     {
@@ -3241,6 +3248,15 @@
       "decision_basis": "sale/restock/entry announcement; console identified",
       "message_id": 41,
       "date": 1795050539
+    },
+    {
+      "board": "ps5",
+      "post_id": "731449",
+      "title": "gta6 출시하자마자 프로 던지는 새끼들 있을거라더니",
+      "url": "https://gall.dcinside.com/mgallery/board/view/?id=ps5&no=731449",
+      "decision_basis": "sale/restock/entry announcement; console identified",
+      "message_id": 42,
+      "date": 1795084522
     }
   ]
 }
