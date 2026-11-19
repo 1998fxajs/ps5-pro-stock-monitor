@@ -51,13 +51,13 @@
     "9cd8b87fdc3d8b1a09b5090a"
   ],
   "last_scan": {
-    "at": "2026-11-19T10:49:11.209755+09:00",
-    "sources_ok": 3,
-    "sources_failed": 6,
-    "results": 10,
+    "at": "2026-11-19T10:54:05.000547+09:00",
+    "sources_ok": 2,
+    "sources_failed": 7,
+    "results": 1,
     "alerts": 0,
     "deferred": 0,
-    "pending_body": 4,
-    "failed_alerts": 1
+    "pending_body": 1,
+    "failed_alerts": 0
   }
 }
