@@ -48,16 +48,18 @@
     "72a83aa1434d6bad5ca74b1e",
     "75676a69ef03595c859b3cec",
     "04293c8361c850f3b04bf393",
-    "9cd8b87fdc3d8b1a09b5090a"
+    "9cd8b87fdc3d8b1a09b5090a",
+    "44203e93885b9825954d9a9e",
+    "ef41abb8b0dabd438f508e58"
   ],
   "last_scan": {
-    "at": "2026-11-19T12:04:04.866855+09:00",
-    "sources_ok": 2,
-    "sources_failed": 7,
-    "results": 1,
+    "at": "2026-11-19T12:09:05.248084+09:00",
+    "sources_ok": 3,
+    "sources_failed": 6,
+    "results": 11,
     "alerts": 0,
     "deferred": 0,
-    "pending_body": 1,
+    "pending_body": 9,
     "failed_alerts": 0
   }
 }
