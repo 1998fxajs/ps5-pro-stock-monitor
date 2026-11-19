@@ -56,13 +56,13 @@
     "e48c49aefe5e9190012b0485"
   ],
   "last_scan": {
-    "at": "2026-11-19T19:25:10.222447+09:00",
-    "sources_ok": 2,
-    "sources_failed": 7,
-    "results": 1,
+    "at": "2026-11-19T19:30:17.102969+09:00",
+    "sources_ok": 3,
+    "sources_failed": 6,
+    "results": 8,
     "alerts": 0,
     "deferred": 0,
-    "pending_body": 1,
+    "pending_body": 8,
     "failed_alerts": 0
   }
 }
